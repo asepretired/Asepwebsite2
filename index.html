@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Asep Scoring - Accurate Device Benchmark</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Asep Scoring - Raw Hardware Benchmark</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #07090e;
-            --card-bg: rgba(18, 24, 38, 0.75);
+            --bg-dark: #06080d;
+            --card-bg: rgba(15, 20, 32, 0.8);
             --card-border: rgba(255, 255, 255, 0.08);
-            --primary: #ff4136;
-            --primary-glow: rgba(255, 65, 54, 0.4);
+            --primary: #ff3344;
+            --primary-glow: rgba(255, 51, 68, 0.45);
             --cpu-color: #00f0ff;
-            --gpu-color: #ff0070;
-            --mem-color: #ffe600;
-            --ux-color: #00ff66;
-            --text: #ffffff;
-            --text-dim: #8b9bb4;
+            --gpu-color: #ff0077;
+            --mem-color: #ffb700;
+            --ux-color: #00ff88;
+            --text: #f0f4fc;
+            --text-dim: #73849e;
         }
 
         * {
@@ -38,19 +38,19 @@
             align-items: center;
             padding: 16px;
             background-image: 
-                radial-gradient(circle at 10% 20%, rgba(255, 65, 54, 0.08) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(0, 240, 255, 0.08) 0%, transparent 40%);
+                radial-gradient(circle at 15% 15%, rgba(255, 51, 68, 0.09) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(0, 240, 255, 0.08) 0%, transparent 45%);
         }
 
         .container {
             width: 100%;
-            max-width: 480px;
+            max-width: 460px;
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 28px;
+            border-radius: 26px;
             padding: 24px;
-            backdrop-filter: blur(20px);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(24px);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
             position: relative;
             overflow: hidden;
         }
@@ -59,15 +59,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         .brand {
             font-family: 'Orbitron', sans-serif;
             font-weight: 900;
-            font-size: 1.35rem;
+            font-size: 1.25rem;
             letter-spacing: 1.5px;
-            background: linear-gradient(135deg, #ff4136, #ff725c);
+            background: linear-gradient(135deg, #ff3344, #ff7a6b);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             display: flex;
@@ -76,25 +76,26 @@
         }
 
         .device-badge {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.04);
             border: 1px solid var(--card-border);
-            padding: 4px 10px;
+            padding: 5px 12px;
             border-radius: 20px;
             font-size: 0.75rem;
             color: var(--text-dim);
+            font-weight: 500;
         }
 
         .specs-panel {
-            background: rgba(0, 0, 0, 0.35);
+            background: rgba(0, 0, 0, 0.4);
             border-radius: 16px;
             padding: 12px 16px;
             font-size: 0.8rem;
             color: var(--text-dim);
-            margin-bottom: 20px;
+            margin-bottom: 22px;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.03);
+            gap: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
         }
 
         .specs-panel span {
@@ -104,8 +105,8 @@
 
         .score-circle-container {
             position: relative;
-            width: 220px;
-            height: 220px;
+            width: 210px;
+            height: 210px;
             margin: 0 auto 20px;
             display: flex;
             justify-content: center;
@@ -121,18 +122,18 @@
 
         .circle-bg {
             fill: none;
-            stroke: rgba(255, 255, 255, 0.05);
-            stroke-width: 10;
+            stroke: rgba(255, 255, 255, 0.04);
+            stroke-width: 9;
         }
 
         .circle-progress {
             fill: none;
             stroke: url(#scoreGrad);
-            stroke-width: 10;
+            stroke-width: 9;
             stroke-linecap: round;
             stroke-dasharray: 565.48;
             stroke-dashoffset: 565.48;
-            transition: stroke-dashoffset 0.3s ease;
+            transition: stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .score-center {
@@ -142,39 +143,43 @@
 
         .score-val {
             font-family: 'Orbitron', sans-serif;
-            font-size: 2.1rem;
+            font-size: 2.2rem;
             font-weight: 900;
             color: #fff;
-            text-shadow: 0 0 20px var(--primary-glow);
+            letter-spacing: -0.5px;
+            text-shadow: 0 0 25px var(--primary-glow);
         }
 
         .score-label {
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             text-transform: uppercase;
             letter-spacing: 2px;
             color: var(--text-dim);
             margin-top: 4px;
         }
 
-        .tier-badge {
+        .status-pill {
             display: inline-block;
-            margin-top: 6px;
-            font-size: 0.7rem;
-            font-weight: 800;
-            padding: 3px 10px;
-            border-radius: 6px;
-            background: rgba(255, 65, 54, 0.15);
-            color: #ff4136;
-            letter-spacing: 0.5px;
+            margin-top: 8px;
+            font-size: 0.68rem;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            padding: 3px 12px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-dim);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
         }
 
         .viewport-wrapper {
             position: relative;
             width: 100%;
-            height: 120px;
-            border-radius: 14px;
+            height: 125px;
+            border-radius: 16px;
             overflow: hidden;
-            background: #020408;
+            background: #020306;
             border: 1px solid var(--card-border);
             margin-bottom: 20px;
             display: flex;
@@ -190,60 +195,72 @@
 
         .status-overlay {
             position: absolute;
-            top: 8px;
-            left: 8px;
-            font-size: 0.7rem;
+            top: 10px;
+            left: 10px;
+            font-size: 0.68rem;
             font-family: 'Orbitron', sans-serif;
-            background: rgba(0, 0, 0, 0.85);
-            padding: 4px 8px;
+            font-weight: 600;
+            background: rgba(4, 7, 12, 0.85);
+            backdrop-filter: blur(8px);
+            padding: 4px 10px;
             border-radius: 6px;
             letter-spacing: 1px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             color: #00f0ff;
         }
 
         .fps-overlay {
             position: absolute;
-            bottom: 8px;
-            right: 8px;
+            bottom: 10px;
+            right: 10px;
             font-size: 0.7rem;
             font-family: 'Orbitron', sans-serif;
-            background: rgba(0, 0, 0, 0.85);
-            padding: 4px 8px;
+            background: rgba(4, 7, 12, 0.85);
+            backdrop-filter: blur(8px);
+            padding: 4px 10px;
             border-radius: 6px;
-            color: #ff0070;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ff0077;
+            border: 1px solid rgba(255, 0, 119, 0.3);
             display: none;
+            font-weight: 700;
         }
 
         .subscores {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 22px;
         }
 
         .sub-card {
-            background: rgba(255, 255, 255, 0.025);
+            background: rgba(255, 255, 255, 0.02);
             border: 1px solid var(--card-border);
-            padding: 12px 14px;
-            border-radius: 14px;
+            padding: 13px 15px;
+            border-radius: 16px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 5px;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .sub-card.active {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
         }
 
         .sub-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.75rem;
-            font-weight: 600;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
 
         .sub-val {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.15rem;
+            font-size: 1.25rem;
             font-weight: 700;
         }
 
@@ -257,27 +274,27 @@
             padding: 16px;
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 0.95rem;
             letter-spacing: 1px;
             border: none;
             border-radius: 16px;
-            background: linear-gradient(135deg, #ff4136, #e71d36);
+            background: linear-gradient(135deg, #ff3344, #db143c);
             color: #fff;
             cursor: pointer;
             box-shadow: 0 10px 25px var(--primary-glow);
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .btn-action:hover {
             transform: translateY(-2px);
-            box-shadow: 0 14px 30px rgba(255, 65, 54, 0.6);
+            box-shadow: 0 14px 32px rgba(255, 51, 68, 0.6);
         }
 
         .btn-action:disabled {
-            background: #202736;
+            background: #19202f;
             box-shadow: none;
             cursor: not-allowed;
-            color: #5d6b82;
+            color: #4b586e;
             transform: none;
         }
 
@@ -285,10 +302,10 @@
             position: absolute;
             left: -9999px;
             top: -9999px;
-            width: 300px;
-            height: 300px;
+            width: 400px;
+            height: 400px;
             opacity: 0;
-            overflow: hidden;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -297,18 +314,18 @@
 <div class="container">
     <header>
         <div class="brand">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
             </svg>
-            ASEP SCORING v2
+            ASEP PRO-BENCH
         </div>
-        <div class="device-badge" id="os-name">Deteksi...</div>
+        <div class="device-badge" id="os-name">Detecting...</div>
     </header>
 
     <div class="specs-panel">
         <div>Cores: <span id="cpu-cores">-</span></div>
         <div>RAM: <span id="device-ram">-</span></div>
-        <div>Layar: <span id="screen-res">-</span></div>
+        <div>Resolution: <span id="screen-res">-</span></div>
         <div>Platform: <span id="platform-info">-</span></div>
     </div>
 
@@ -316,8 +333,8 @@
         <svg class="score-svg" viewBox="0 0 200 200">
             <defs>
                 <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#ff4136" />
-                    <stop offset="50%" stop-color="#ff0070" />
+                    <stop offset="0%" stop-color="#ff3344" />
+                    <stop offset="50%" stop-color="#ff0077" />
                     <stop offset="100%" stop-color="#00f0ff" />
                 </linearGradient>
             </defs>
@@ -326,46 +343,46 @@
         </svg>
         <div class="score-center">
             <div class="score-val" id="total-score">0</div>
-            <div class="score-label">Total Score</div>
-            <div class="tier-badge" id="tier-badge">READY</div>
+            <div class="score-label">Total Index</div>
+            <div class="status-pill" id="status-pill">READY</div>
         </div>
     </div>
 
-    <!-- Viewport for GPU WebGL Stress -->
+    <!-- Viewport GPU Test -->
     <div class="viewport-wrapper">
         <canvas id="gpu-canvas"></canvas>
         <div class="status-overlay" id="test-status">STANDBY</div>
         <div class="fps-overlay" id="fps-counter">0 FPS</div>
     </div>
 
-    <!-- Subscores -->
+    <!-- Subscores Grid -->
     <div class="subscores">
-        <div class="sub-card">
-            <div class="sub-header cpu-t"><span>CPU</span> <span>⚡</span></div>
+        <div class="sub-card" id="card-cpu">
+            <div class="sub-header cpu-t"><span>CPU COMPLEX</span> <span>⚡</span></div>
             <div class="sub-val cpu-t" id="score-cpu">0</div>
         </div>
-        <div class="sub-card">
-            <div class="sub-header gpu-t"><span>GPU</span> <span>🎮</span></div>
+        <div class="sub-card" id="card-gpu">
+            <div class="sub-header gpu-t"><span>GPU SHADER</span> <span>🎮</span></div>
             <div class="sub-val gpu-t" id="score-gpu">0</div>
         </div>
-        <div class="sub-card">
-            <div class="sub-header mem-t"><span>MEM</span> <span>💾</span></div>
+        <div class="sub-card" id="card-mem">
+            <div class="sub-header mem-t"><span>MEM LATENCY</span> <span>💾</span></div>
             <div class="sub-val mem-t" id="score-mem">0</div>
         </div>
-        <div class="sub-card">
-            <div class="sub-header ux-t"><span>UX</span> <span>📱</span></div>
+        <div class="sub-card" id="card-ux">
+            <div class="sub-header ux-t"><span>ENGINE UX</span> <span>📱</span></div>
             <div class="sub-val ux-t" id="score-ux">0</div>
         </div>
     </div>
 
-    <button class="btn-action" id="start-btn" onclick="startBenchmark()">RUN HARD STRESS TEST</button>
+    <button class="btn-action" id="start-btn" onclick="startBenchmark()">RUN EXTREME BENCHMARK</button>
 </div>
 
 <div id="dom-sandbox"></div>
 
 <script>
-    // --- Identifikasi Perangkat ---
-    document.getElementById('cpu-cores').innerText = navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} Cores` : '4 Cores (Est.)';
+    // --- Spesifikasi Hardware Info ---
+    document.getElementById('cpu-cores').innerText = navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} Cores` : 'Unknown';
     document.getElementById('device-ram').innerText = navigator.deviceMemory ? `~${navigator.deviceMemory} GB` : 'N/A';
     document.getElementById('screen-res').innerText = `${Math.round(window.screen.width * window.devicePixelRatio)}x${Math.round(window.screen.height * window.devicePixelRatio)}`;
     
@@ -382,6 +399,7 @@
 
     const canvas = document.getElementById('gpu-canvas');
     const statusText = document.getElementById('test-status');
+    const statusPill = document.getElementById('status-pill');
     const fpsCounter = document.getElementById('fps-counter');
     const circleBar = document.getElementById('circle-bar');
     const totalCircumference = 2 * Math.PI * 90;
@@ -393,120 +411,143 @@
 
     const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-    function animateCounter(elementId, targetVal, duration = 800) {
+    // Animasi counter super smooth dengan kurva exponential ease-out
+    function animateCounter(elementId, targetVal, duration = 1000) {
         const el = document.getElementById(elementId);
         const startTime = performance.now();
-        const startVal = parseInt(el.innerText.replace(/,/g, '')) || 0;
+        const startVal = parseInt(el.innerText.replace(/\D/g, '')) || 0;
 
         function update(currentTime) {
-            const progress = Math.min((currentTime - startTime) / duration, 1);
-            const current = Math.floor(startVal + (targetVal - startVal) * progress);
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            // Ease Out Exponential Formula
+            const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+            const current = Math.floor(startVal + (targetVal - startVal) * ease);
             el.innerText = current.toLocaleString('id-ID');
             if (progress < 1) requestAnimationFrame(update);
         }
         requestAnimationFrame(update);
     }
 
-    // ==========================================
-    // 1. CPU TEST: Mandelbrot + Matrix Mult + Hash
-    // ==========================================
-    async function testCPU() {
-        statusText.innerText = "TESTING: CPU HEAVY MATH";
-        await sleep(50);
+    function setActiveCard(cardId) {
+        document.querySelectorAll('.sub-card').forEach(c => c.classList.remove('active'));
+        if (cardId) document.getElementById(cardId).classList.add('active');
+    }
 
-        const duration = 2600;
+    // =========================================================================
+    // 1. CPU TEST: Mandelbrot 64-bit + 64x64 Matrix Multiplications + Bitwise
+    // =========================================================================
+    async function testCPU() {
+        setActiveCard('card-cpu');
+        statusText.innerText = "TESTING: CPU ALGORITHM COMPLEXITY";
+        await sleep(40);
+
+        const duration = 2800;
         const startTime = performance.now();
-        let totalOps = 0;
+        let ops = 0;
         let lastYield = performance.now();
 
-        // 1. Mandelbrot Floating Point Math
-        const mandelBuffer = new Float64Array(100);
+        // 64x64 Matrix Multiplication Arrays
+        const size = 64;
+        const A = new Float64Array(size * size);
+        const B = new Float64Array(size * size);
+        const C = new Float64Array(size * size);
+        for (let i = 0; i < size * size; i++) {
+            A[i] = (i * 0.1337) % 100;
+            B[i] = (i * 0.7331) % 100;
+        }
+
         while (performance.now() - startTime < duration) {
-            for (let i = 0; i < 2000; i++) {
-                let cr = (i % 100) * 0.03 - 2.0;
-                let ci = (i / 100) * 0.03 - 1.5;
-                let zr = 0, zi = 0;
+            // A. Mandelbrot FP64 Math (Intense Branching)
+            for (let i = 0; i < 600; i++) {
+                let cr = (i % 30) * 0.08 - 2.1;
+                let ci = (i / 30) * 0.08 - 1.2;
+                let zr = 0.0, zi = 0.0;
                 let iter = 0;
-                while (zr * zr + zi * zi < 4.0 && iter < 60) {
+                while (zr * zr + zi * zi < 4.0 && iter < 100) {
                     let temp = zr * zr - zi * zi + cr;
                     zi = 2.0 * zr * zi + ci;
                     zr = temp;
                     iter++;
                 }
-                mandelBuffer[i % 100] = zr;
-                totalOps += iter;
+                ops += iter;
             }
 
-            // 2. 32x32 Matrix Multiplication (Cache & ALU stress)
-            const A = new Float32Array(1024), B = new Float32Array(1024), C = new Float32Array(1024);
-            for (let i = 0; i < 1024; i++) { A[i] = i * 0.1; B[i] = i * 0.2; }
-            for (let i = 0; i < 32; i++) {
-                for (let j = 0; j < 32; j++) {
-                    let sum = 0;
-                    for (let k = 0; k < 32; k++) {
-                        sum += A[i * 32 + k] * B[k * 32 + j];
+            // B. 64x64 Matrix multiplication (Cache Line Stress & FPU)
+            for (let i = 0; i < size; i++) {
+                const iOffset = i * size;
+                for (let k = 0; k < size; k++) {
+                    const aVal = A[iOffset + k];
+                    const kOffset = k * size;
+                    for (let j = 0; j < size; j++) {
+                        C[iOffset + j] += aVal * B[kOffset + j];
                     }
-                    C[i * 32 + j] = sum;
                 }
             }
-            totalOps += 32 * 32 * 32;
+            ops += (size * size * size);
 
-            // Kontrol UI yielding tanpa terkena timer clamp 4ms
-            if (performance.now() - lastYield > 45) {
+            if (performance.now() - lastYield > 40) {
                 await sleep(0);
                 lastYield = performance.now();
             }
         }
 
-        // Formula Skala: Flagship (~400k-550k), Mid (~180k-250k), Redmi 8 (~50k-70k)
-        const cpuScore = Math.floor((totalOps / duration) * 7.5);
-        return Math.max(cpuScore, 10000);
+        // Formula kuadratik proporsional untuk melebarkan jarak prosesor cepat vs lambat
+        const opsPerSec = ops / (duration / 1000);
+        const finalScore = Math.floor(Math.pow(opsPerSec / 8000, 1.22) * 95);
+        return Math.max(finalScore, 5000);
     }
 
-    // ==========================================
-    // 2. GPU TEST: WebGL 3D Raymarching Shader
-    // ==========================================
+    // =========================================================================
+    // 2. GPU TEST: 100-step Heavy WebGL 3D Raymarching & High Density
+    // =========================================================================
     async function testGPU() {
-        statusText.innerText = "TESTING: GPU 3D SHADER";
+        setActiveCard('card-gpu');
+        statusText.innerText = "TESTING: GPU RAYMARCHING SHADER";
         fpsCounter.style.display = 'block';
         fpsCounter.innerText = "0 FPS";
-        await sleep(50);
+        await sleep(40);
 
-        // Pasang resolusi render tinggi sesuai pixel density layar
+        // Skala render dinaikkan hingga 2.0x Device Pixel Ratio
         const dpr = Math.min(window.devicePixelRatio || 1, 2.0);
         canvas.width = Math.floor(canvas.clientWidth * dpr);
         canvas.height = Math.floor(canvas.clientHeight * dpr);
 
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        const gl = canvas.getContext('webgl', { powerPreference: "high-performance", antialias: false });
         if (!gl) {
             fpsCounter.style.display = 'none';
-            return 30000; // Fallback jika WebGL dimatikan
+            return 8000;
         }
 
         const vsSource = `
             attribute vec2 position;
-            void main() {
-                gl_Position = vec4(position, 0.0, 1.0);
-            }
+            void main() { gl_Position = vec4(position, 0.0, 1.0); }
         `;
 
-        // Shader Raymarching Torus 3D Berat dengan dynamic lighting
+        // Shader 3D Raymarching 100 Iterasi dengan dynamic lights & ambient occlusion
         const fsSource = `
             precision highp float;
             uniform vec2 u_res;
             uniform float u_time;
 
+            float smin(float a, float b, float k) {
+                float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+                return mix(b, a, h) - k * h * (1.0 - h);
+            }
+
             float map(vec3 p) {
                 vec3 q = p;
-                float c = cos(u_time * 1.5);
-                float s = sin(u_time * 1.5);
+                float c = cos(u_time * 1.8);
+                float s = sin(u_time * 1.8);
                 q.xz = mat2(c, -s, s, c) * q.xz;
                 q.xy = mat2(c, -s, s, c) * q.xy;
-                return length(vec2(length(q.xz) - 1.0, q.y)) - 0.35;
+                float torus = length(vec2(length(q.xz) - 1.1, q.y)) - 0.35;
+                float sphere = length(p + vec3(sin(u_time * 2.0) * 0.7, 0.0, cos(u_time * 2.0) * 0.7)) - 0.45;
+                return smin(torus, sphere, 0.35);
             }
 
             vec3 calcNormal(vec3 p) {
-                float h = 0.002;
+                float h = 0.001;
                 vec2 k = vec2(1.0, -1.0);
                 return normalize(
                     k.xyy * map(p + k.xyy * h) +
@@ -518,26 +559,26 @@
 
             void main() {
                 vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / min(u_res.y, u_res.x);
-                vec3 ro = vec3(0.0, 0.0, -3.0);
-                vec3 rd = normalize(vec3(uv, 1.2));
+                vec3 ro = vec3(0.0, 0.0, -3.2);
+                vec3 rd = normalize(vec3(uv, 1.1));
                 float dO = 0.0;
-                vec3 col = vec3(0.04, 0.06, 0.1);
+                vec3 col = vec3(0.03, 0.05, 0.08);
 
-                for (int i = 0; i < 70; i++) {
+                for (int i = 0; i < 100; i++) {
                     vec3 p = ro + rd * dO;
                     float dS = map(p);
                     dO += dS;
-                    if (dO > 15.0 || abs(dS) < 0.002) break;
+                    if (dO > 12.0 || abs(dS) < 0.0015) break;
                 }
 
-                if (dO < 15.0) {
+                if (dO < 12.0) {
                     vec3 p = ro + rd * dO;
                     vec3 n = calcNormal(p);
-                    vec3 light = normalize(vec3(1.0, 2.0, -1.5));
-                    float diff = max(dot(n, light), 0.15);
-                    float spec = pow(max(dot(reflect(-light, n), -rd), 0.0), 16.0);
+                    vec3 light = normalize(vec3(1.5, 2.5, -2.0));
+                    float diff = max(dot(n, light), 0.12);
+                    float spec = pow(max(dot(reflect(-light, n), -rd), 0.0), 32.0);
                     vec3 base = 0.5 + 0.5 * cos(u_time + p.xyx + vec3(0.0, 2.0, 4.0));
-                    col = base * diff + vec3(1.0) * spec * 0.7;
+                    col = base * diff + vec3(1.0) * spec * 0.9;
                 }
                 gl_FragColor = vec4(col, 1.0);
             }
@@ -572,7 +613,7 @@
 
         let frames = 0;
         let lastFpsUpdate = performance.now();
-        const duration = 3000;
+        const duration = 3200;
         const start = performance.now();
 
         return new Promise(resolve => {
@@ -580,20 +621,19 @@
                 const elapsed = now - start;
                 if (elapsed >= duration) {
                     fpsCounter.style.display = 'none';
-                    const avgFps = (frames / (elapsed / 1000));
-                    // Hitung skor berdasarkan FPS dan jumlah piksel yang dirender
-                    const pixelDensityFactor = (canvas.width * canvas.height) / (320 * 120);
-                    const gpuScore = Math.floor(avgFps * pixelDensityFactor * 1350);
-                    resolve(Math.max(gpuScore, 15000));
+                    const avgFps = frames / (elapsed / 1000);
+                    const pixels = canvas.width * canvas.height;
+                    // Skor diferensiasi tajam berdasarkan FPS murni dan beban pixel shader
+                    const gpuScore = Math.floor(Math.pow(avgFps, 1.35) * (pixels / 14000) * 8.5);
+                    resolve(Math.max(gpuScore, 6000));
                     return;
                 }
 
-                // Render 2 pass per frame untuk menghukum GPU bandwidth rendah
                 gl.uniform1f(uTime, elapsed * 0.001);
                 gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
                 frames++;
-                if (now - lastFpsUpdate > 300) {
+                if (now - lastFpsUpdate > 250) {
                     const currentFps = Math.round((frames / ((now - start) / 1000)));
                     fpsCounter.innerText = `${currentFps} FPS`;
                     lastFpsUpdate = now;
@@ -604,171 +644,158 @@
         });
     }
 
-    // ==========================================
-    // 3. MEMORY TEST: True Throughput & Sorting
-    // ==========================================
+    // =========================================================================
+    // 3. MEMORY TEST: Non-linear Cache Thrashing & Large Block Sorting
+    // =========================================================================
     async function testMEM() {
-        statusText.innerText = "TESTING: RAM BANDWIDTH";
-        await sleep(50);
+        setActiveCard('card-mem');
+        statusText.innerText = "TESTING: MEMORY BANDWIDTH & CACHE";
+        await sleep(40);
 
-        const duration = 2200;
+        const duration = 2500;
         const start = performance.now();
-        let totalMBProcessed = 0;
+        let totalCycles = 0;
         let lastYield = performance.now();
 
-        // Alokasikan buffer 16MB (4 juta integer 32-bit)
-        const bufferSize = 4000000;
-        const memArray = new Uint32Array(bufferSize);
+        // 32MB Buffer (8 Juta element 32-bit uint) untuk memaksa cache miss
+        const bufferLen = 8 * 1024 * 1024;
+        const largeMem = new Uint32Array(bufferLen);
 
         while (performance.now() - start < duration) {
-            // 1. Sequential Write
-            for (let i = 0; i < bufferSize; i += 8) {
-                memArray[i] = i * 3;
-                memArray[i+1] = i * 7;
-                memArray[i+2] = i * 11;
-                memArray[i+3] = i * 13;
+            // A. Cache-strided jumping (Memaksa pembacaan langsung dari DRAM fisik)
+            const stride = 1021; // Bilangan prima untuk mencegah L1/L2 prefetching
+            let acc = 0;
+            for (let i = 0; i < 200000; i++) {
+                const idx = (i * stride) & (bufferLen - 1);
+                largeMem[idx] = (acc + i) ^ 0x5A5A5A5A;
+                acc += largeMem[idx];
             }
-            totalMBProcessed += 16;
+            totalCycles += 10;
 
-            // 2. Non-sequential Cache-strided read/write
-            let checksum = 0;
-            for (let i = 0; i < bufferSize; i += 64) {
-                checksum += memArray[i];
-            }
-            totalMBProcessed += 4;
+            // B. Heavy QuickSort (Array 60.000 Float64 acak)
+            const sortBuffer = new Float64Array(60000);
+            for (let i = 0; i < 60000; i++) sortBuffer[i] = Math.random();
+            sortBuffer.sort();
+            totalCycles += 25;
 
-            // 3. Quick Float Sort (50k elements)
-            const sortArr = new Float64Array(50000);
-            for (let i = 0; i < 50000; i++) sortArr[i] = (i * 16807) % 2147483647;
-            sortArr.sort();
-            totalMBProcessed += 8;
-
-            if (performance.now() - lastYield > 45) {
+            if (performance.now() - lastYield > 40) {
                 await sleep(0);
                 lastYield = performance.now();
             }
         }
 
-        // Formula Skala Bandwidth RAM
-        const memScore = Math.floor((totalMBProcessed / duration) * 9800);
-        return Math.max(memScore, 15000);
+        const scoreMem = Math.floor(Math.pow(totalCycles / (duration / 1000), 1.3) * 620);
+        return Math.max(scoreMem, 5000);
     }
 
-    // ==========================================
-    // 4. UX TEST: Deep JSON + RegEx + DOM Reflow
-    // ==========================================
+    // =========================================================================
+    // 4. UX & DOM: Forced Reflow Thrashing & Deep Object Mutation
+    // =========================================================================
     async function testUX() {
-        statusText.innerText = "TESTING: UX & DOM REFLOW";
-        await sleep(50);
+        setActiveCard('card-ux');
+        statusText.innerText = "TESTING: DOM ENGINE & JS RUNTIME";
+        await sleep(40);
 
         const sandbox = document.getElementById('dom-sandbox');
-        const duration = 2000;
+        const duration = 2400;
         const start = performance.now();
-        let uxOps = 0;
+        let operations = 0;
         let lastYield = performance.now();
 
-        // 1. Dataset JSON kompleks untuk simulasi real app
-        const sampleTree = [];
-        for (let i = 0; i < 150; i++) {
-            sampleTree.push({ id: i, name: `item_${i}`, meta: { active: true, tags: ['tech', 'bench', 'test'] } });
+        // Complex deep object creation
+        const complexObj = [];
+        for (let i = 0; i < 300; i++) {
+            complexObj.push({
+                uid: `item_${i}`,
+                val: i * Math.PI,
+                tags: ["stress", "dom", "compute"],
+                sub: { active: true, innerVal: i % 7 }
+            });
         }
-        const jsonStr = JSON.stringify(sampleTree);
+        const strData = JSON.stringify(complexObj);
 
         while (performance.now() - start < duration) {
-            // JSON Serialization Stress
-            const parsed = JSON.parse(jsonStr);
-            parsed.reverse();
+            // A. Deep Serialization
+            const parsed = JSON.parse(strData);
+            parsed.sort((a, b) => b.val - a.val);
             JSON.stringify(parsed);
-            uxOps += 20;
+            operations += 15;
 
-            // Heavy RegEx Matching
-            const textCorpus = "The quick brown fox jumps over the lazy dog 12345! ".repeat(20);
-            const matches = textCorpus.match(/(\b\w{4,}\b)/g);
-            uxOps += matches ? matches.length : 0;
+            // B. Forced DOM Layout Thrashing (Memaksa Browser merender ulang layout berkali-kali)
+            for (let d = 0; d < 8; d++) {
+                const div = document.createElement('div');
+                div.style.cssText = `width: ${(operations % 150) + 20}px; height: 18px; padding: 4px; margin: 1px;`;
+                sandbox.appendChild(div);
+                // Baca layout paksa
+                const dummy = div.getBoundingClientRect().width;
+            }
+            operations += 20;
 
-            // True DOM Thrashing & Forced Reflow
-            const card = document.createElement('div');
-            card.style.cssText = `width:${(uxOps % 100) + 50}px; height: 30px; margin: 2px; background: red;`;
-            sandbox.appendChild(card);
-            
-            // Force browser layout engine recalculation
-            const reflow = card.getBoundingClientRect().width;
-            if (sandbox.children.length > 25) {
+            if (sandbox.children.length > 50) {
                 sandbox.innerHTML = '';
             }
-            uxOps += 15;
 
-            if (performance.now() - lastYield > 45) {
+            if (performance.now() - lastYield > 40) {
                 await sleep(0);
                 lastYield = performance.now();
             }
         }
         sandbox.innerHTML = '';
 
-        const uxScore = Math.floor((uxOps / duration) * 3500);
-        return Math.max(uxScore, 12000);
+        const scoreUX = Math.floor(Math.pow(operations / (duration / 1000), 1.25) * 410);
+        return Math.max(scoreUX, 5000);
     }
 
-    // --- Main Benchmark Controller ---
+    // =========================================================================
+    // MAIN BENCHMARK RUNNER
+    // =========================================================================
     async function startBenchmark() {
         const btn = document.getElementById('start-btn');
         btn.disabled = true;
-        btn.innerText = "STRESS TESTING IN PROGRESS...";
+        btn.innerText = "BENCHMARK RUNNING...";
+        statusPill.innerText = "TESTING";
+        statusPill.style.color = "#00f0ff";
+        statusPill.style.borderColor = "rgba(0, 240, 255, 0.4)";
 
         ['total-score', 'score-cpu', 'score-gpu', 'score-mem', 'score-ux'].forEach(id => {
             document.getElementById(id).innerText = '0';
         });
-        document.getElementById('tier-badge').innerText = 'BENCHMARKING';
-        document.getElementById('tier-badge').style.color = '#ff4136';
-        setProgress(5);
+        setProgress(4);
 
         // 1. CPU
-        const cpuScore = await testCPU();
-        animateCounter('score-cpu', cpuScore);
+        const cpu = await testCPU();
+        animateCounter('score-cpu', cpu);
         setProgress(28);
 
         // 2. GPU
-        const gpuScore = await testGPU();
-        animateCounter('score-gpu', gpuScore);
+        const gpu = await testGPU();
+        animateCounter('score-gpu', gpu);
         setProgress(58);
 
-        // 3. MEMORY
-        const memScore = await testMEM();
-        animateCounter('score-mem', memScore);
+        // 3. MEM
+        const mem = await testMEM();
+        animateCounter('score-mem', mem);
         setProgress(82);
 
-        // 4. UX & DOM
-        const uxScore = await testUX();
-        animateCounter('score-ux', uxScore);
+        // 4. UX
+        const ux = await testUX();
+        animateCounter('score-ux', ux);
         setProgress(100);
 
+        setActiveCard(null);
+
         // TOTAL SCORE
-        const total = cpuScore + gpuScore + memScore + uxScore;
-        animateCounter('total-score', total, 1200);
+        const total = cpu + gpu + mem + ux;
+        animateCounter('total-score', total, 1400);
 
-        // KLASIFIKASI TIER REALISTIS
-        const tierBadge = document.getElementById('tier-badge');
-        if (total >= 1200000) {
-            tierBadge.innerText = 'GOD TIER / FLAGSHIP';
-            tierBadge.style.color = '#00f0ff';
-            tierBadge.style.background = 'rgba(0, 240, 255, 0.15)';
-        } else if (total >= 750000) {
-            tierBadge.innerText = 'HIGH-END';
-            tierBadge.style.color = '#00ff66';
-            tierBadge.style.background = 'rgba(0, 255, 102, 0.15)';
-        } else if (total >= 300000) {
-            tierBadge.innerText = 'MID-RANGE';
-            tierBadge.style.color = '#ffe600';
-            tierBadge.style.background = 'rgba(255, 230, 0, 0.15)';
-        } else {
-            tierBadge.innerText = 'ENTRY LEVEL / BUDGET';
-            tierBadge.style.color = '#ff4136';
-            tierBadge.style.background = 'rgba(255, 65, 54, 0.15)';
-        }
+        // Selesai murni teknis tanpa badge entry/mid/flagship
+        statusPill.innerText = "BENCHMARKED";
+        statusPill.style.color = "#00ff88";
+        statusPill.style.borderColor = "rgba(0, 255, 136, 0.4)";
+        statusText.innerText = "TEST COMPLETE";
 
-        statusText.innerText = "BENCHMARK COMPLETED";
         btn.disabled = false;
-        btn.innerText = "RE-RUN TEST";
+        btn.innerText = "RE-TEST DEVICE";
     }
 </script>
 
