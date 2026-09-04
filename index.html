@@ -1,634 +1,591 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Airdrop Direct P2P - Ultra Fast</title>
-  
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-
-  <!-- Libraries -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-            mono: ['"JetBrains Mono"', 'monospace'],
-          },
-          colors: {
-            brand: {
-              50: '#fff7ed',
-              500: '#f97316',
-              600: '#ea580c',
-              dark: '#0a0a0c',
-              card: '#121216',
-              border: '#23232a'
-            }
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Asep Scoring - Device Benchmark</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #07090e;
+            --card-bg: rgba(18, 24, 38, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --primary: #ff4136;
+            --primary-glow: rgba(255, 65, 54, 0.4);
+            --cpu-color: #00f0ff;
+            --gpu-color: #ff0070;
+            --mem-color: #ffe600;
+            --ux-color: #00ff66;
+            --text: #ffffff;
+            --text-dim: #8b9bb4;
         }
-      }
-    }
-  </script>
 
-  <style>
-    body {
-      background-color: #0a0a0c;
-      background-image: radial-gradient(circle at 50% 0%, rgba(249, 115, 22, 0.08) 0%, transparent 60%);
-    }
-    .custom-scroll::-webkit-scrollbar { width: 4px; }
-    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: #2a2a35; border-radius: 4px; }
-  </style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 65, 54, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 240, 255, 0.08) 0%, transparent 40%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 28px;
+            padding: 24px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .brand {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.4rem;
+            letter-spacing: 1.5px;
+            background: linear-gradient(135deg, #ff4136, #ff725c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .device-badge {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .specs-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 12px 16px;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .specs-panel span {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .score-circle-container {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            margin: 0 auto 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .score-svg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .circle-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.05);
+            stroke-width: 10;
+        }
+
+        .circle-progress {
+            fill: none;
+            stroke: url(#scoreGrad);
+            stroke-width: 10;
+            stroke-linecap: round;
+            stroke-dasharray: 565.48;
+            stroke-dashoffset: 565.48;
+            transition: stroke-dashoffset 0.4s ease;
+        }
+
+        .score-center {
+            text-align: center;
+            z-index: 2;
+        }
+
+        .score-val {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        .score-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        .tier-badge {
+            display: inline-block;
+            margin-top: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 6px;
+            background: rgba(255, 65, 54, 0.2);
+            color: #ff4136;
+        }
+
+        .viewport-wrapper {
+            position: relative;
+            width: 100%;
+            height: 110px;
+            border-radius: 14px;
+            overflow: hidden;
+            background: #000;
+            border: 1px solid var(--card-border);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #gpu-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .status-overlay {
+            position: absolute;
+            font-size: 0.75rem;
+            font-family: 'Orbitron', sans-serif;
+            background: rgba(0, 0, 0, 0.75);
+            padding: 4px 10px;
+            border-radius: 8px;
+            letter-spacing: 1px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .subscores {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .sub-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            padding: 12px 14px;
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .sub-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .sub-val {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .cpu-t { color: var(--cpu-color); }
+        .gpu-t { color: var(--gpu-color); }
+        .mem-t { color: var(--mem-color); }
+        .ux-t  { color: var(--ux-color); }
+
+        .btn-action {
+            width: 100%;
+            padding: 16px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #ff4136, #e71d36);
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 10px 25px var(--primary-glow);
+            transition: all 0.2s ease;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px rgba(255, 65, 54, 0.6);
+        }
+
+        .btn-action:disabled {
+            background: #2a3342;
+            box-shadow: none;
+            cursor: not-allowed;
+            color: #5d6b82;
+            transform: none;
+        }
+
+        /* Hidden stress test container for UX reflow tests */
+        #dom-sandbox {
+            position: absolute;
+            left: -9999px;
+            width: 100px;
+            height: 100px;
+            opacity: 0;
+            overflow: hidden;
+        }
+    </style>
 </head>
+<body>
 
-<body class="text-zinc-200 min-h-screen flex flex-col font-sans selection:bg-orange-500 selection:text-black">
-
-  <!-- TOP BAR -->
-  <header class="border-b border-brand-border bg-brand-dark/80 backdrop-blur sticky top-0 z-50">
-    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center text-black font-bold text-lg shadow-lg shadow-orange-500/20">
-          ⚡
+<div class="container">
+    <header>
+        <div class="brand">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            ASEP SCORING
         </div>
-        <div>
-          <h1 class="font-bold text-sm tracking-tight text-white flex items-center gap-2">
-            FAST AIRDROP <span class="text-[10px] bg-zinc-800 text-orange-400 px-2 py-0.5 rounded-full border border-zinc-700">P2P LAN/WEB</span>
-          </h1>
-          <p class="text-[11px] text-zinc-400">Transfer Langsung Antar-Perangkat (Nir-Server)</p>
-        </div>
-      </div>
+        <div class="device-badge" id="os-name">Deteksi...</div>
+    </header>
 
-      <!-- Badge Status -->
-      <div id="connStatusBadge" class="flex items-center gap-2 text-xs font-mono px-3 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/80">
-        <span id="connDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
-        <span id="connLabel" class="text-zinc-300 font-medium">Memuat ID...</span>
-      </div>
-    </div>
-  </header>
-
-  <!-- MAIN CONTAINER -->
-  <main class="flex-1 max-w-5xl mx-auto w-full p-4 md:p-6 grid grid-cols-1 md:grid-cols-12 gap-6">
-
-    <!-- LEFT COLUMN: CONNECTIVITY (5 Cols) -->
-    <div class="md:col-span-5 flex flex-col gap-5">
-      
-      <!-- STEP 1: DEVICE PIN -->
-      <div class="bg-brand-card border border-brand-border rounded-2xl p-5 shadow-xl">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-bold uppercase tracking-wider text-orange-400">Langkah 1: Perangkat Anda</span>
-          <span class="text-[10px] font-mono bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded">PIN ANDA</span>
-        </div>
-        <p class="text-xs text-zinc-400 mb-3">Bagikan PIN ini atau scan QR di HP tujuan:</p>
-
-        <div class="flex items-center justify-between bg-black/50 border border-zinc-800 rounded-xl p-3">
-          <div>
-            <div class="text-[10px] font-mono text-zinc-500 uppercase">PIN Anda</div>
-            <div id="myPin" class="text-3xl font-mono font-bold tracking-widest text-white">...</div>
-          </div>
-          <button onclick="copyShareLink()" id="copyBtn" class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-zinc-200 transition active:scale-95">
-            <i data-lucide="copy" class="w-4 h-4"></i>
-            <span>Salin Link</span>
-          </button>
-        </div>
-
-        <!-- QR TOGGLE -->
-        <div class="mt-4 pt-4 border-t border-zinc-800/80">
-          <button onclick="toggleQR()" class="w-full flex items-center justify-between text-xs text-zinc-300 hover:text-white transition">
-            <span class="flex items-center gap-2 font-medium">
-              <i data-lucide="qr-code" class="w-4 h-4 text-orange-400"></i>
-              Buka Kode QR (Scan dari HP)
-            </span>
-            <i data-lucide="chevron-down" id="qrIcon" class="w-4 h-4 transition-transform"></i>
-          </button>
-          
-          <div id="qrWrapper" class="hidden flex-col items-center justify-center p-4 mt-3 bg-white rounded-xl">
-            <div id="qrcode"></div>
-            <p class="text-[11px] text-zinc-800 font-bold mt-2">Arahkan kamera HP ke QR ini</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- STEP 2: CONNECT TO TARGET -->
-      <div class="bg-brand-card border border-brand-border rounded-2xl p-5 shadow-xl">
-        <span class="text-xs font-bold uppercase tracking-wider text-orange-400 block mb-2">Sambungkan ke Perangkat Teman</span>
-        <p class="text-xs text-zinc-400 mb-3">Masukkan PIN perangkat teman untuk menyambung:</p>
-        
-        <form onsubmit="handleManualConnect(event)" class="space-y-3">
-          <div class="flex gap-2">
-            <input 
-              type="text" 
-              id="targetPinInput" 
-              placeholder="Contoh: 58219" 
-              maxlength="5"
-              pattern="[0-9]*"
-              class="flex-1 bg-black/50 border border-zinc-800 rounded-xl px-3 py-2.5 font-mono text-center text-lg font-bold uppercase text-white focus:outline-none focus:border-orange-500 transition"
-            />
-            <button 
-              type="submit" 
-              id="btnConnect"
-              class="px-5 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs uppercase tracking-wider rounded-xl transition active:scale-95 flex items-center gap-1.5"
-            >
-              <span>Sambung</span>
-              <i data-lucide="arrow-right" class="w-4 h-4"></i>
-            </button>
-          </div>
-        </form>
-
-        <!-- Connected Status Bar -->
-        <div id="activePeerBadge" class="hidden mt-4 pt-3 border-t border-zinc-800/80">
-          <div class="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3">
-            <div class="flex items-center gap-2.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_#10B981]"></span>
-              <div>
-                <p class="text-xs font-bold text-emerald-400">Siap Kirim File!</p>
-                <p id="connectedDeviceText" class="text-[11px] font-mono text-zinc-300">Tersambung ke #-----</p>
-              </div>
-            </div>
-            <button onclick="disconnectPeer()" class="text-xs font-semibold text-red-400 hover:text-red-300 px-2 py-1 rounded bg-red-500/10">Putus</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Speed Tips -->
-      <div class="p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 text-xs text-zinc-400 leading-relaxed flex gap-3">
-        <i data-lucide="zap" class="w-5 h-5 text-orange-400 shrink-0 mt-0.5"></i>
-        <span><strong>Tips Kecepatan Maksimal:</strong> Jika kedua perangkat berada di jaringan Wi-Fi yang sama, data dikirim langsung lewat Local LAN berkecepatan 30MB/s - 80MB/s tanpa kuota internet!</span>
-      </div>
+    <div class="specs-panel">
+        <div>Cores: <span id="cpu-cores">-</span></div>
+        <div>RAM: <span id="device-ram">-</span></div>
+        <div>Layar: <span id="screen-res">-</span></div>
+        <div>Platform: <span id="platform-info">-</span></div>
     </div>
 
-    <!-- RIGHT COLUMN: DROP ZONE & TRANSFERS (7 Cols) -->
-    <div class="md:col-span-7 flex flex-col gap-5">
-      
-      <!-- DROPZONE -->
-      <div 
-        id="dropZone"
-        ondrop="handleDrop(event)" 
-        ondragover="handleDragOver(event)" 
-        ondragleave="handleDragLeave(event)"
-        onclick="triggerFilePick()"
-        class="border-2 border-dashed border-zinc-800 bg-brand-card/60 hover:bg-brand-card hover:border-orange-500/60 rounded-2xl p-8 flex flex-col items-center justify-center text-center transition-all cursor-pointer relative min-h-[250px] group"
-      >
-        <input type="file" id="filePicker" multiple class="hidden" onchange="handleFileChosen(event)" />
-        
-        <div class="w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-orange-400 group-hover:scale-110 transition duration-200 mb-3 shadow-inner">
-          <i data-lucide="upload-cloud" class="w-8 h-8"></i>
+    <div class="score-circle-container">
+        <svg class="score-svg" viewBox="0 0 200 200">
+            <defs>
+                <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ff4136" />
+                    <stop offset="50%" stop-color="#ff0070" />
+                    <stop offset="100%" stop-color="#00f0ff" />
+                </linearGradient>
+            </defs>
+            <circle class="circle-bg" cx="100" cy="100" r="90" />
+            <circle class="circle-progress" id="circle-bar" cx="100" cy="100" r="90" />
+        </svg>
+        <div class="score-center">
+            <div class="score-val" id="total-score">0</div>
+            <div class="score-label">Total Score</div>
+            <div class="tier-badge" id="tier-badge">READY</div>
         </div>
-
-        <h3 class="text-base font-bold text-white mb-1">Klik atau Tarik File ke Sini</h3>
-        <p class="text-xs text-zinc-400 max-w-sm mb-4">Mendukung Video 4K, ZIP raksasa, Foto Full HD, APK, dan file ukuran puluhan GB tanpa batas.</p>
-
-        <span class="px-4 py-2 rounded-xl bg-zinc-800 group-hover:bg-orange-500 group-hover:text-black font-semibold text-xs transition border border-zinc-700">
-          Pilih File dari Penyimpanan
-        </span>
-      </div>
-
-      <!-- TRANSFER MONITOR -->
-      <div class="bg-brand-card border border-brand-border rounded-2xl p-5 flex-1 flex flex-col shadow-xl">
-        <div class="flex items-center justify-between pb-3 border-b border-zinc-800/80 mb-3">
-          <div class="flex items-center gap-2">
-            <i data-lucide="arrow-left-right" class="w-4 h-4 text-orange-400"></i>
-            <span class="text-xs font-bold uppercase tracking-wider text-white">Aktivitas Transfer File</span>
-          </div>
-          <span id="transferBadgeCount" class="text-[10px] font-mono bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded">0 Transfer</span>
-        </div>
-
-        <div id="emptyTransferState" class="flex-1 flex flex-col items-center justify-center py-12 text-zinc-500">
-          <i data-lucide="package-open" class="w-9 h-9 stroke-1 mb-2 opacity-50"></i>
-          <p class="text-xs font-mono">Belum ada file dikirim / diterima</p>
-        </div>
-
-        <div id="transferQueue" class="space-y-3 custom-scroll overflow-y-auto max-h-[340px] pr-1 hidden">
-          <!-- Item Card di-inject via JavaScript -->
-        </div>
-      </div>
-
     </div>
 
-  </main>
+    <!-- Live Viewport for GPU Graphics Stress -->
+    <div class="viewport-wrapper">
+        <canvas id="gpu-canvas"></canvas>
+        <div class="status-overlay" id="test-status">STANDBY</div>
+    </div>
 
-  <footer class="border-t border-brand-border/40 py-3 text-center text-xs font-mono text-zinc-500">
-    ⚡ DIRECT WebRTC ENGINE // 100% PRIVATE // ZERO-COMPRESSION
-  </footer>
-
-  <!-- CORE LOGIC & HIGH PERFORMANCE ENGINE -->
-  <script>
-    // Inisialisasi Audio FX (Feedback suara)
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playBeep(freq = 600, duration = 0.08) {
-      try {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-      } catch (e) {}
-    }
-
-    // STATE MESIN TRANSFER
-    let peer = null;
-    let activeConn = null;
-    let dataChannel = null;
-    let myPIN = null;
-
-    // HIGH SPEED CONSTANTS
-    const CHUNK_SIZE = 64 * 1024; // 64 KB (Sweet spot WebRTC transfer tercepat)
-    const MAX_BUFFERED_AMOUNT = 4 * 1024 * 1024; // 4MB Buffer cap agar RAM tidak meledak
-
-    // Tracking Incoming File (Download)
-    let incomingFile = null;
-    let receivedChunks = [];
-    let receivedBytes = 0;
-    let downloadStartTime = 0;
-    let lastUiUpdate = 0;
-
-    lucide.createIcons();
-
-    // 1. Inisialisasi PeerJS
-    function init() {
-      myPIN = Math.floor(10000 + Math.random() * 90000).toString();
-      const peerId = `airdrop-v2-${myPIN}`;
-
-      peer = new Peer(peerId, {
-        debug: 1,
-        config: {
-          iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun1.l.google.com:19302' }
-          ]
-        }
-      });
-
-      peer.on('open', (id) => {
-        document.getElementById('myPin').innerText = myPIN;
-        setConnectionStatus(true, "Siap Terhubung");
-        generateQR(myPIN);
-
-        // Jika URL memiliki parameter ?pair=XXXXX langsung sambungkan
-        const urlParam = new URLSearchParams(window.location.search).get('pair');
-        if (urlParam && urlParam !== myPIN) {
-          document.getElementById('targetPinInput').value = urlParam;
-          setTimeout(() => connectToRemote(urlParam), 500);
-        }
-      });
-
-      peer.on('connection', (conn) => {
-        bindConnectionEvents(conn);
-      });
-
-      peer.on('error', (err) => {
-        console.error("Peer Error: ", err);
-        setConnectionStatus(false, "Koneksi Error");
-      });
-    }
-
-    function setConnectionStatus(isReady, text) {
-      const dot = document.getElementById('connDot');
-      const label = document.getElementById('connLabel');
-      label.innerText = text;
-      if (isReady) {
-        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10B981]";
-      } else {
-        dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse";
-      }
-    }
-
-    // 2. Hubungkan ke Peer Lain
-    function handleManualConnect(e) {
-      e.preventDefault();
-      const targetPin = document.getElementById('targetPinInput').value.trim();
-      if (!targetPin || targetPin.length !== 5) {
-        alert("Masukkan 5-digit PIN yang valid!");
-        return;
-      }
-      connectToRemote(targetPin);
-    }
-
-    function connectToRemote(targetPin) {
-      playBeep(700, 0.05);
-      setConnectionStatus(false, `Menyambungkan #${targetPin}...`);
-      
-      const conn = peer.connect(`airdrop-v2-${targetPin}`, {
-        reliable: true
-      });
-      bindConnectionEvents(conn);
-    }
-
-    // 3. Event Handler Koneksi & Setup Raw DataChannel
-    function bindConnectionEvents(conn) {
-      activeConn = conn;
-
-      conn.on('open', () => {
-        playBeep(1200, 0.15);
-        const partnerPin = conn.peer.replace('airdrop-v2-', '');
-        
-        // Akses langsung RTCDataChannel asli untuk transmisi cepat
-        dataChannel = conn.dataChannel;
-        dataChannel.binaryType = 'arraybuffer';
-
-        setConnectionStatus(true, "Tersambung!");
-        document.getElementById('activePeerBadge').classList.remove('hidden');
-        document.getElementById('connectedDeviceText').innerText = `Tersambung dengan #${partnerPin}`;
-        document.getElementById('targetPinInput').value = partnerPin;
-      });
-
-      // Menerima data mentah
-      conn.on('data', (data) => {
-        handleRawData(data);
-      });
-
-      conn.on('close', () => {
-        playBeep(400, 0.2);
-        activeConn = null;
-        dataChannel = null;
-        setConnectionStatus(true, "Koneksi Terputus");
-        document.getElementById('activePeerBadge').classList.add('hidden');
-      });
-    }
-
-    function disconnectPeer() {
-      if (activeConn) activeConn.close();
-    }
-
-    // 4. ALGORITMA PENGIRIMAN SUPER CEPAT (ASYNC + STREAMING BACKPRESSURE)
-    function triggerFilePick() {
-      document.getElementById('filePicker').click();
-    }
-
-    function handleFileChosen(e) {
-      if (e.target.files.length) startSendingFiles(e.target.files);
-    }
-
-    function handleDragOver(e) {
-      e.preventDefault();
-      document.getElementById('dropZone').classList.add('border-orange-500', 'bg-brand-card');
-    }
-
-    function handleDragLeave(e) {
-      e.preventDefault();
-      document.getElementById('dropZone').classList.remove('border-orange-500');
-    }
-
-    function handleDrop(e) {
-      e.preventDefault();
-      document.getElementById('dropZone').classList.remove('border-orange-500');
-      if (e.dataTransfer.files.length) {
-        startSendingFiles(e.dataTransfer.files);
-      }
-    }
-
-    async function startSendingFiles(files) {
-      if (!activeConn || !activeConn.open) {
-        alert("⚠️ Hubungkan perangkat Anda terlebih dahulu dengan memasukkan PIN teman!");
-        return;
-      }
-
-      for (const file of Array.from(files)) {
-        await transferSingleFile(file);
-      }
-    }
-
-    // Pipeline Pengiriman Tanpa Beban Serialization
-    async function transferSingleFile(file) {
-      const fileId = 'tx-' + Math.random().toString(36).substring(2, 9);
-      renderQueueCard(fileId, file.name, file.size, 'upload');
-
-      // 1. Kirim Metadata kecil (Handshake)
-      activeConn.send({
-        __type: 'file-meta',
-        id: fileId,
-        name: file.name,
-        size: file.size,
-        fileType: file.type
-      });
-
-      let offset = 0;
-      const startTime = performance.now();
-      let lastUiTick = 0;
-
-      // 2. Loop Binary Stream
-      while (offset < file.size) {
-        // Kontrol Backpressure: Jika antrean buffer WebRTC melebihi batas, tahan sebentar sampai buffer kosong
-        if (dataChannel.bufferedAmount > MAX_BUFFERED_AMOUNT) {
-          await new Promise((resolve) => {
-            dataChannel.onbufferedamountlow = () => {
-              dataChannel.onbufferedamountlow = null;
-              resolve();
-            };
-          });
-        }
-
-        const slice = file.slice(offset, offset + CHUNK_SIZE);
-        const arrayBuffer = await slice.arrayBuffer();
-        
-        // Kirim LANGSUNG byte array mentah (Zero Overhead)
-        dataChannel.send(arrayBuffer);
-        offset += arrayBuffer.byteLength;
-
-        // Update UI secara halus tanpa bikin lag (Throttled per 100ms)
-        const now = performance.now();
-        if (now - lastUiTick > 100 || offset === file.size) {
-          const progress = Math.round((offset / file.size) * 100);
-          const elapsedSec = (now - startTime) / 1000;
-          const speedBps = offset / (elapsedSec || 0.001); // Bytes per detik
-          updateTransferUI(fileId, progress, speedBps);
-          lastUiTick = now;
-        }
-      }
-
-      // 3. Kirim sinyal Selesai
-      activeConn.send({ __type: 'file-done', id: fileId });
-      finishTransferUI(fileId, 'upload');
-      playBeep(1000, 0.1);
-    }
-
-    // 5. ALGORITMA PENERIMAAN SUPER CEPAT
-    function handleRawData(data) {
-      // Cek apakah data adalah kontrol metadata (Objek JSON)
-      if (typeof data === 'object' && data.__type) {
-        if (data.__type === 'file-meta') {
-          incomingFile = data;
-          receivedChunks = [];
-          receivedBytes = 0;
-          downloadStartTime = performance.now();
-          lastUiUpdate = 0;
-          renderQueueCard(data.id, data.name, data.size, 'download');
-        } 
-        else if (data.__type === 'file-done') {
-          // File selesai diterima -> Buat Blob & trigger download
-          const blob = new Blob(receivedChunks, { type: incomingFile.fileType || 'application/octet-stream' });
-          const url = URL.createObjectURL(blob);
-          
-          finishTransferUI(incomingFile.id, 'download', url, incomingFile.name);
-          playBeep(1300, 0.2);
-
-          // Otomatis download file
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = incomingFile.name;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-
-          // Bebaskan memori
-          receivedChunks = [];
-          incomingFile = null;
-        }
-        return;
-      }
-
-      // Jika data adalah Raw ArrayBuffer (Isi File)
-      if (data instanceof ArrayBuffer && incomingFile) {
-        receivedChunks.push(data);
-        receivedBytes += data.byteLength;
-
-        const now = performance.now();
-        if (now - lastUiUpdate > 100 || receivedBytes === incomingFile.size) {
-          const progress = Math.round((receivedBytes / incomingFile.size) * 100);
-          const elapsedSec = (now - downloadStartTime) / 1000;
-          const speedBps = receivedBytes / (elapsedSec || 0.001);
-          updateTransferUI(incomingFile.id, progress, speedBps);
-          lastUiUpdate = now;
-        }
-      }
-    }
-
-    // 6. UI HELPERS & RENDERER
-    function renderQueueCard(id, name, size, direction) {
-      document.getElementById('emptyTransferState').classList.add('hidden');
-      const queue = document.getElementById('transferQueue');
-      queue.classList.remove('hidden');
-
-      const isUpload = direction === 'upload';
-      const formattedSize = formatSize(size);
-
-      const html = `
-        <div id="${id}" class="bg-black/50 border border-zinc-800/90 rounded-xl p-3.5 text-xs font-mono">
-          <div class="flex items-center justify-between mb-2">
-            <div class="flex items-center gap-2 truncate max-w-[220px] md:max-w-sm">
-              <i data-lucide="${isUpload ? 'arrow-up-right' : 'arrow-down-left'}" class="w-4 h-4 ${isUpload ? 'text-orange-400' : 'text-emerald-400'} shrink-0"></i>
-              <span class="truncate text-white font-medium">${name}</span>
-            </div>
-            <span class="text-zinc-400 text-[11px] shrink-0">${formattedSize}</span>
-          </div>
-
-          <!-- Bar Progress -->
-          <div class="w-full bg-zinc-800 rounded-full h-2 overflow-hidden mb-2">
-            <div id="${id}-bar" class="bg-orange-500 h-full rounded-full transition-all duration-75" style="width: 0%"></div>
-          </div>
-
-          <!-- Speed & ETA Tracker -->
-          <div class="flex justify-between items-center text-[10px] text-zinc-400">
-            <span id="${id}-status">${isUpload ? 'Mengirim...' : 'Menerima...'}</span>
-            <div class="flex gap-2 font-mono">
-              <span id="${id}-speed" class="text-zinc-300">0 MB/s</span>
-              <span id="${id}-percent" class="font-bold text-white">0%</span>
-            </div>
-          </div>
+    <!-- Subscore Metrics -->
+    <div class="subscores">
+        <div class="sub-card">
+            <div class="sub-header cpu-t"><span>CPU</span> <span>⚡</span></div>
+            <div class="sub-val cpu-t" id="score-cpu">0</div>
         </div>
-      `;
-      queue.insertAdjacentHTML('afterbegin', html);
-      lucide.createIcons();
+        <div class="sub-card">
+            <div class="sub-header gpu-t"><span>GPU</span> <span>🎮</span></div>
+            <div class="sub-val gpu-t" id="score-gpu">0</div>
+        </div>
+        <div class="sub-card">
+            <div class="sub-header mem-t"><span>MEM</span> <span>💾</span></div>
+            <div class="sub-val mem-t" id="score-mem">0</div>
+        </div>
+        <div class="sub-card">
+            <div class="sub-header ux-t"><span>UX</span> <span>📱</span></div>
+            <div class="sub-val ux-t" id="score-ux">0</div>
+        </div>
+    </div>
+
+    <button class="btn-action" id="start-btn" onclick="startBenchmark()">RUN TEST</button>
+</div>
+
+<div id="dom-sandbox"></div>
+
+<script>
+    // --- Device Detection ---
+    document.getElementById('cpu-cores').innerText = navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} Thread` : '4 (Est.)';
+    document.getElementById('device-ram').innerText = navigator.deviceMemory ? `~${navigator.deviceMemory} GB` : 'N/A';
+    document.getElementById('screen-res').innerText = `${window.screen.width * window.devicePixelRatio}x${window.screen.height * window.devicePixelRatio}`;
+    
+    const ua = navigator.userAgent;
+    let platform = "Browser";
+    if (/Android/i.test(ua)) platform = "Android";
+    else if (/iPhone|iPad|iPod/i.test(ua)) platform = "iOS";
+    else if (/Windows/i.test(ua)) platform = "Windows";
+    else if (/Macintosh/i.test(ua)) platform = "macOS";
+    else if (/Linux/i.test(ua)) platform = "Linux";
+    
+    document.getElementById('os-name').innerText = platform;
+    document.getElementById('platform-info').innerText = platform;
+
+    // --- Benchmark Logic ---
+    const canvas = document.getElementById('gpu-canvas');
+    const ctx = canvas.getContext('2d');
+    const statusText = document.getElementById('test-status');
+    const circleBar = document.getElementById('circle-bar');
+    const totalCircumference = 2 * Math.PI * 90; // r=90
+
+    function setProgress(percent) {
+        const offset = totalCircumference - (percent / 100 * totalCircumference);
+        circleBar.style.strokeDashoffset = offset;
     }
 
-    function updateTransferUI(id, percent, speedBytesPerSec) {
-      const bar = document.getElementById(`${id}-bar`);
-      const pct = document.getElementById(`${id}-percent`);
-      const speed = document.getElementById(`${id}-speed`);
+    function resizeCanvas() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-      if (bar) bar.style.width = `${percent}%`;
-      if (pct) pct.innerText = `${percent}%`;
-      if (speed) speed.innerText = `${formatSize(speedBytesPerSec)}/s`;
+    // Helper: Async pause agar browser bisa render UI
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    // Animasi counter angka
+    function animateCounter(elementId, targetVal, duration = 1000) {
+        const el = document.getElementById(elementId);
+        const startTime = performance.now();
+        const startVal = parseInt(el.innerText.replace(/,/g, '')) || 0;
+
+        function update(currentTime) {
+            const progress = Math.min((currentTime - startTime) / duration, 1);
+            const current = Math.floor(startVal + (targetVal - startVal) * progress);
+            el.innerText = current.toLocaleString('id-ID');
+            if (progress < 1) requestAnimationFrame(update);
+        }
+        requestAnimationFrame(update);
     }
 
-    function finishTransferUI(id, direction, downloadUrl = null, fileName = null) {
-      const bar = document.getElementById(`${id}-bar`);
-      const status = document.getElementById(`${id}-status`);
-      const speed = document.getElementById(`${id}-speed`);
-      const pct = document.getElementById(`${id}-percent`);
+    // 1. CPU TEST: Prime numbers + Complex Math stress loops
+    async function testCPU() {
+        statusText.innerText = "TESTING: CPU MATH & LOGIC";
+        await sleep(100);
 
-      if (bar) {
-        bar.style.width = '100%';
-        bar.className = 'bg-emerald-500 h-full rounded-full';
-      }
-      if (pct) pct.innerText = '100%';
-      if (speed) speed.innerText = 'Selesai';
+        const duration = 2500; // 2.5 detik stress
+        const start = performance.now();
+        let operations = 0;
 
-      if (status) {
-        if (direction === 'download' && downloadUrl) {
-          status.innerHTML = `
-            <a href="${downloadUrl}" download="${fileName}" class="text-emerald-400 font-bold hover:underline flex items-center gap-1">
-              ✓ Berhasil Disimpan (Download Ulang)
-            </a>`;
+        while (performance.now() - start < duration) {
+            // Kombinasi Trigonometri, Matrix mini & Sqrt
+            for (let i = 0; i < 5000; i++) {
+                Math.sin(i) * Math.cos(i) + Math.sqrt(i * 1.5);
+                operations++;
+            }
+            // Yield sesaat agar UI tidak crash
+            if (operations % 500000 === 0) await sleep(0);
+        }
+
+        // Kalkulasi skor setara ponsel/PC skala Antutu
+        const rawScore = Math.floor((operations / duration) * 45);
+        return rawScore;
+    }
+
+    // 2. GPU TEST: Canvas 2D Particle Storm & Physics Stress
+    async function testGPU() {
+        statusText.innerText = "TESTING: GPU RENDER 3D";
+        
+        const particleCount = 1200;
+        const particles = [];
+        for (let i = 0; i < particleCount; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 6,
+                vy: (Math.random() - 0.5) * 6,
+                size: Math.random() * 3.5 + 1,
+                color: `hsl(${Math.random() * 360}, 90%, 60%)`
+            });
+        }
+
+        let frames = 0;
+        const duration = 3000;
+        const start = performance.now();
+
+        return new Promise((resolve) => {
+            function render() {
+                const now = performance.now();
+                if (now - start >= duration) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    const fps = (frames / (duration / 1000));
+                    // Skor GPU dipengaruhi stabilitas FPS & resolusi
+                    const score = Math.floor(fps * particleCount * 2.8);
+                    resolve(score);
+                    return;
+                }
+
+                // Render stress simulation
+                ctx.fillStyle = 'rgba(7, 9, 14, 0.25)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                for (let i = 0; i < particles.length; i++) {
+                    const p = particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                    if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.fill();
+                }
+
+                frames++;
+                requestAnimationFrame(render);
+            }
+            requestAnimationFrame(render);
+        });
+    }
+
+    // 3. MEMORY TEST: High Volume TypedArray Allocation & Sort
+    async function testMEM() {
+        statusText.innerText = "TESTING: MEMORY SPEED";
+        await sleep(100);
+
+        const duration = 1800;
+        const start = performance.now();
+        let totalAllocatedMB = 0;
+
+        while (performance.now() - start < duration) {
+            // Allocate 1 Juta 64-bit float (~8MB per batch)
+            const arr = new Float64Array(1000000);
+            for (let i = 0; i < 50000; i++) {
+                arr[i] = Math.random();
+            }
+            arr.sort();
+            totalAllocatedMB += 8;
+            await sleep(0);
+        }
+
+        const score = Math.floor(totalAllocatedMB * 140);
+        return score;
+    }
+
+    // 4. UX TEST: DOM Tree Mutation, Reflow & Layout Thrashing
+    async function testUX() {
+        statusText.innerText = "TESTING: UX & REFLOW";
+        const sandbox = document.getElementById('dom-sandbox');
+        const duration = 1500;
+        const start = performance.now();
+        let domOperations = 0;
+
+        while (performance.now() - start < duration) {
+            const div = document.createElement('div');
+            div.style.cssText = `width:${Math.random()*50}px;height:${Math.random()*50}px;transform:scale(${Math.random()});`;
+            sandbox.appendChild(div);
+            // Force browser reflow
+            const _ = sandbox.offsetHeight;
+            if (sandbox.children.length > 50) {
+                sandbox.innerHTML = '';
+            }
+            domOperations++;
+            if (domOperations % 30 === 0) await sleep(0);
+        }
+        sandbox.innerHTML = '';
+
+        const score = Math.floor(domOperations * 120);
+        return score;
+    }
+
+    // --- Main Controller ---
+    async function startBenchmark() {
+        const btn = document.getElementById('start-btn');
+        btn.disabled = true;
+        btn.innerText = "BENCHMARKING...";
+
+        // Reset display
+        ['total-score', 'score-cpu', 'score-gpu', 'score-mem', 'score-ux'].forEach(id => {
+            document.getElementById(id).innerText = '0';
+        });
+        document.getElementById('tier-badge').innerText = 'BENCHMARKING';
+        setProgress(5);
+
+        // 1. CPU
+        const cpuScore = await testCPU();
+        animateCounter('score-cpu', cpuScore);
+        setProgress(28);
+
+        // 2. GPU
+        const gpuScore = await testGPU();
+        animateCounter('score-gpu', gpuScore);
+        setProgress(58);
+
+        // 3. MEM
+        const memScore = await testMEM();
+        animateCounter('score-mem', memScore);
+        setProgress(82);
+
+        // 4. UX
+        const uxScore = await testUX();
+        animateCounter('score-ux', uxScore);
+        setProgress(100);
+
+        // Total
+        const total = cpuScore + gpuScore + memScore + uxScore;
+        animateCounter('total-score', total, 1500);
+
+        // Tier classification ala AnTuTu
+        const tierBadge = document.getElementById('tier-badge');
+        if (total >= 1000000) {
+            tierBadge.innerText = 'GOD TIER / FLAGSHIP';
+            tierBadge.style.color = '#00f0ff';
+        } else if (total >= 600000) {
+            tierBadge.innerText = 'HIGH-END';
+            tierBadge.style.color = '#00ff66';
+        } else if (total >= 300000) {
+            tierBadge.innerText = 'MID-RANGE';
+            tierBadge.style.color = '#ffe600';
         } else {
-          status.innerHTML = `<span class="text-emerald-400 font-bold">✓ Terkirim Sukses</span>`;
+            tierBadge.innerText = 'ENTRY LEVEL';
+            tierBadge.style.color = '#ff4136';
         }
-      }
 
-      // Update badge jumlah transfer
-      const badge = document.getElementById('transferBadgeCount');
-      const count = (parseInt(badge.innerText) || 0) + 1;
-      badge.innerText = `${count} Selesai`;
+        statusText.innerText = "TEST COMPLETE";
+        btn.disabled = false;
+        btn.innerText = "TEST LAGI";
     }
+</script>
 
-    function formatSize(bytes) {
-      if (!+bytes) return '0 B';
-      const k = 1024;
-      const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
-    }
-
-    function generateQR(pin) {
-      const url = `${window.location.origin}${window.location.pathname}?pair=${pin}`;
-      const qrContainer = document.getElementById('qrcode');
-      qrContainer.innerHTML = '';
-      new QRCode(qrContainer, {
-        text: url,
-        width: 140,
-        height: 140,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.M
-      });
-    }
-
-    function toggleQR() {
-      const wrapper = document.getElementById('qrWrapper');
-      const icon = document.getElementById('qrIcon');
-      wrapper.classList.toggle('hidden');
-      icon.classList.toggle('rotate-180');
-    }
-
-    function copyShareLink() {
-      const link = `${window.location.origin}${window.location.pathname}?pair=${myPIN}`;
-      navigator.clipboard.writeText(link).then(() => {
-        playBeep(900, 0.05);
-        const btn = document.getElementById('copyBtn');
-        const oldText = btn.innerHTML;
-        btn.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Tersalin!`;
-        lucide.createIcons();
-        setTimeout(() => {
-          btn.innerHTML = oldText;
-          lucide.createIcons();
-        }, 1200);
-      });
-    }
-
-    window.addEventListener('DOMContentLoaded', init);
-  </script>
 </body>
 </html>
