@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Airdrop from Temu // Fast P2P Pipeline</title>
+  <title>Airdrop Direct P2P - Ultra Fast</title>
   
-  <!-- Font -->
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 
-  <!-- Tailwind CSS & Icons -->
+  <!-- Libraries -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -21,17 +21,17 @@
       theme: {
         extend: {
           fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
             mono: ['"JetBrains Mono"', 'monospace'],
-            sans: ['"Space Grotesk"', 'sans-serif'],
           },
           colors: {
-            temu: {
-              orange: '#FF5000',
-              accent: '#FF7A00',
-              dark: '#08080A',
-              panel: '#101114',
-              border: '#1E2026',
-              highlight: '#272A33'
+            brand: {
+              50: '#fff7ed',
+              500: '#f97316',
+              600: '#ea580c',
+              dark: '#0a0a0c',
+              card: '#121216',
+              border: '#23232a'
             }
           }
         }
@@ -41,181 +41,173 @@
 
   <style>
     body {
-      background-color: #08080A;
-      background-image: 
-        radial-gradient(rgba(255, 80, 0, 0.04) 1px, transparent 1px),
-        linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-      background-size: 24px 24px, 48px 48px;
+      background-color: #0a0a0c;
+      background-image: radial-gradient(circle at 50% 0%, rgba(249, 115, 22, 0.08) 0%, transparent 60%);
     }
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: #101114;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #272A33;
-      border-radius: 2px;
-    }
+    .custom-scroll::-webkit-scrollbar { width: 4px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #2a2a35; border-radius: 4px; }
   </style>
 </head>
 
-<body class="text-zinc-300 min-h-screen flex flex-col font-sans selection:bg-temu-orange selection:text-black">
+<body class="text-zinc-200 min-h-screen flex flex-col font-sans selection:bg-orange-500 selection:text-black">
 
-  <!-- HEADER / APP BAR -->
-  <header class="border-b border-temu-border bg-temu-dark/80 backdrop-blur sticky top-0 z-50">
-    <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <div class="w-8 h-8 rounded bg-temu-orange text-black flex items-center justify-center font-mono font-extrabold text-lg shadow-[0_0_15px_rgba(255,80,0,0.4)]">
-          T
+  <!-- TOP BAR -->
+  <header class="border-b border-brand-border bg-brand-dark/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center text-black font-bold text-lg shadow-lg shadow-orange-500/20">
+          ⚡
         </div>
         <div>
-          <h1 class="text-sm font-mono tracking-tight font-extrabold uppercase text-white flex items-center gap-1.5">
-            Airdrop <span class="text-xs px-1.5 py-0.5 rounded bg-zinc-800 text-temu-orange border border-zinc-700">from temu</span>
+          <h1 class="font-bold text-sm tracking-tight text-white flex items-center gap-2">
+            FAST AIRDROP <span class="text-[10px] bg-zinc-800 text-orange-400 px-2 py-0.5 rounded-full border border-zinc-700">P2P LAN/WEB</span>
           </h1>
-          <p class="text-[10px] font-mono text-zinc-500">v1.0.4-p2p // zero-cloud-relay</p>
+          <p class="text-[11px] text-zinc-400">Transfer Langsung Antar-Perangkat (Nir-Server)</p>
         </div>
       </div>
 
-      <!-- Network Status Badge -->
-      <div id="statusBadge" class="flex items-center space-x-2 text-xs font-mono px-3 py-1.5 rounded-full border border-temu-border bg-temu-panel">
-        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse" id="statusDot"></span>
-        <span id="statusText" class="text-zinc-400">Inisialisasi...</span>
+      <!-- Badge Status -->
+      <div id="connStatusBadge" class="flex items-center gap-2 text-xs font-mono px-3 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/80">
+        <span id="connDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+        <span id="connLabel" class="text-zinc-300 font-medium">Memuat ID...</span>
       </div>
     </div>
   </header>
 
   <!-- MAIN CONTAINER -->
-  <main class="flex-1 max-w-4xl mx-auto w-full p-4 md:p-6 grid grid-cols-1 md:grid-cols-12 gap-6">
+  <main class="flex-1 max-w-5xl mx-auto w-full p-4 md:p-6 grid grid-cols-1 md:grid-cols-12 gap-6">
 
-    <!-- LEFT COLUMN: DEVICE & PAIRING CONTROL (5 Cols) -->
+    <!-- LEFT COLUMN: CONNECTIVITY (5 Cols) -->
     <div class="md:col-span-5 flex flex-col gap-5">
       
-      <!-- Box 1: Your Device Code -->
-      <div class="border border-temu-border bg-temu-panel rounded-xl p-5 relative overflow-hidden shadow-2xl">
-        <div class="absolute top-0 right-0 w-32 h-32 bg-temu-orange/5 blur-3xl -z-0"></div>
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-xs font-mono uppercase tracking-wider text-zinc-400">Perangkat Kamu</span>
-          <span class="text-[10px] font-mono bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded">HOST KEY</span>
+      <!-- STEP 1: DEVICE PIN -->
+      <div class="bg-brand-card border border-brand-border rounded-2xl p-5 shadow-xl">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-orange-400">Langkah 1: Perangkat Anda</span>
+          <span class="text-[10px] font-mono bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded">PIN ANDA</span>
         </div>
+        <p class="text-xs text-zinc-400 mb-3">Bagikan PIN ini atau scan QR di HP tujuan:</p>
 
-        <div class="flex items-center justify-between bg-black/60 border border-zinc-800 rounded-lg p-3 my-2">
+        <div class="flex items-center justify-between bg-black/50 border border-zinc-800 rounded-xl p-3">
           <div>
-            <div class="text-[10px] font-mono text-zinc-500 uppercase">Pairing PIN</div>
-            <div id="myCode" class="text-3xl font-mono font-bold tracking-widest text-white">-----</div>
+            <div class="text-[10px] font-mono text-zinc-500 uppercase">PIN Anda</div>
+            <div id="myPin" class="text-3xl font-mono font-bold tracking-widest text-white">...</div>
           </div>
-          <button id="copyBtn" onclick="copyLink()" class="p-2.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white transition active:scale-95" title="Salin Tautan">
+          <button onclick="copyShareLink()" id="copyBtn" class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-zinc-200 transition active:scale-95">
             <i data-lucide="copy" class="w-4 h-4"></i>
+            <span>Salin Link</span>
           </button>
         </div>
 
-        <!-- QR Toggle for Fast Mobile Connection -->
-        <div class="mt-4 pt-4 border-t border-temu-border/60">
-          <button onclick="toggleQR()" class="w-full flex items-center justify-between text-xs font-mono text-zinc-400 hover:text-white transition">
-            <span class="flex items-center gap-2">
-              <i data-lucide="qr-code" class="w-4 h-4 text-temu-orange"></i>
-              Scan QR via HP (Otomatis Konek)
+        <!-- QR TOGGLE -->
+        <div class="mt-4 pt-4 border-t border-zinc-800/80">
+          <button onclick="toggleQR()" class="w-full flex items-center justify-between text-xs text-zinc-300 hover:text-white transition">
+            <span class="flex items-center gap-2 font-medium">
+              <i data-lucide="qr-code" class="w-4 h-4 text-orange-400"></i>
+              Buka Kode QR (Scan dari HP)
             </span>
-            <i data-lucide="chevron-down" id="qrChevron" class="w-4 h-4 transition-transform"></i>
+            <i data-lucide="chevron-down" id="qrIcon" class="w-4 h-4 transition-transform"></i>
           </button>
           
-          <div id="qrContainer" class="hidden flex-col items-center justify-center p-4 mt-3 bg-white rounded-lg">
+          <div id="qrWrapper" class="hidden flex-col items-center justify-center p-4 mt-3 bg-white rounded-xl">
             <div id="qrcode"></div>
-            <p class="text-[10px] font-mono text-zinc-900 mt-2 text-center font-bold">Buka kamera HP & scan untuk sambung</p>
+            <p class="text-[11px] text-zinc-800 font-bold mt-2">Arahkan kamera HP ke QR ini</p>
           </div>
         </div>
       </div>
 
-      <!-- Box 2: Connect to Other Device -->
-      <div class="border border-temu-border bg-temu-panel rounded-xl p-5 relative shadow-2xl">
-        <span class="text-xs font-mono uppercase tracking-wider text-zinc-400 block mb-3">Sambungkan ke HP / Laptop Lain</span>
+      <!-- STEP 2: CONNECT TO TARGET -->
+      <div class="bg-brand-card border border-brand-border rounded-2xl p-5 shadow-xl">
+        <span class="text-xs font-bold uppercase tracking-wider text-orange-400 block mb-2">Sambungkan ke Perangkat Teman</span>
+        <p class="text-xs text-zinc-400 mb-3">Masukkan PIN perangkat teman untuk menyambung:</p>
         
-        <form onsubmit="connectToPeer(event)" class="space-y-3">
-          <div>
-            <label class="text-[11px] font-mono text-zinc-500 block mb-1">MASUKKAN 5-DIGIT KODE TARGET</label>
-            <div class="flex gap-2">
-              <input 
-                type="text" 
-                id="targetCodeInput" 
-                placeholder="misal: 48921"
-                maxlength="6"
-                class="flex-1 bg-black/60 border border-zinc-800 rounded-lg px-3 py-2.5 font-mono text-center text-lg uppercase tracking-widest text-white focus:outline-none focus:border-temu-orange transition"
-              />
-              <button 
-                type="submit" 
-                id="connectBtn"
-                class="px-5 bg-temu-orange hover:bg-temu-accent text-black font-mono font-bold text-xs uppercase rounded-lg transition active:scale-95 flex items-center gap-1.5"
-              >
-                <span>Pair</span>
-                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
+        <form onsubmit="handleManualConnect(event)" class="space-y-3">
+          <div class="flex gap-2">
+            <input 
+              type="text" 
+              id="targetPinInput" 
+              placeholder="Contoh: 58219" 
+              maxlength="5"
+              pattern="[0-9]*"
+              class="flex-1 bg-black/50 border border-zinc-800 rounded-xl px-3 py-2.5 font-mono text-center text-lg font-bold uppercase text-white focus:outline-none focus:border-orange-500 transition"
+            />
+            <button 
+              type="submit" 
+              id="btnConnect"
+              class="px-5 bg-orange-500 hover:bg-orange-600 text-black font-bold text-xs uppercase tracking-wider rounded-xl transition active:scale-95 flex items-center gap-1.5"
+            >
+              <span>Sambung</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
           </div>
         </form>
 
-        <div id="activePeerBox" class="hidden mt-4 pt-3 border-t border-temu-border/60">
-          <div class="flex items-center justify-between bg-zinc-900/90 border border-zinc-800 rounded p-2.5">
-            <div class="flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-              <span id="connectedPeerName" class="text-xs font-mono text-white">Terkoneksi</span>
+        <!-- Connected Status Bar -->
+        <div id="activePeerBadge" class="hidden mt-4 pt-3 border-t border-zinc-800/80">
+          <div class="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3">
+            <div class="flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_#10B981]"></span>
+              <div>
+                <p class="text-xs font-bold text-emerald-400">Siap Kirim File!</p>
+                <p id="connectedDeviceText" class="text-[11px] font-mono text-zinc-300">Tersambung ke #-----</p>
+              </div>
             </div>
-            <button onclick="disconnectPeer()" class="text-[10px] font-mono text-rose-400 hover:underline">Putuskan</button>
+            <button onclick="disconnectPeer()" class="text-xs font-semibold text-red-400 hover:text-red-300 px-2 py-1 rounded bg-red-500/10">Putus</button>
           </div>
         </div>
       </div>
 
-      <!-- Footnote Badge -->
-      <div class="p-3.5 rounded-lg border border-zinc-900 bg-black/30 text-[11px] text-zinc-500 font-mono leading-relaxed">
-        <span class="text-temu-orange font-bold">INFO:</span> Transfer P2P WebRTC langsung antar-perangkat. File Anda tidak mampir ke server mana pun. Cepat, tanpa batas ukuran gila.
+      <!-- Quick Speed Tips -->
+      <div class="p-4 rounded-xl border border-zinc-800 bg-zinc-900/30 text-xs text-zinc-400 leading-relaxed flex gap-3">
+        <i data-lucide="zap" class="w-5 h-5 text-orange-400 shrink-0 mt-0.5"></i>
+        <span><strong>Tips Kecepatan Maksimal:</strong> Jika kedua perangkat berada di jaringan Wi-Fi yang sama, data dikirim langsung lewat Local LAN berkecepatan 30MB/s - 80MB/s tanpa kuota internet!</span>
       </div>
     </div>
 
-    <!-- RIGHT COLUMN: FILE DROP & TRANSFER MONITOR (7 Cols) -->
+    <!-- RIGHT COLUMN: DROP ZONE & TRANSFERS (7 Cols) -->
     <div class="md:col-span-7 flex flex-col gap-5">
       
-      <!-- Dropzone Panel -->
+      <!-- DROPZONE -->
       <div 
         id="dropZone"
-        ondrop="handleFileDrop(event)" 
+        ondrop="handleDrop(event)" 
         ondragover="handleDragOver(event)" 
         ondragleave="handleDragLeave(event)"
-        class="border-2 border-dashed border-zinc-800 bg-temu-panel/50 hover:bg-temu-panel hover:border-zinc-700 rounded-xl p-8 flex flex-col items-center justify-center text-center transition-all cursor-pointer relative group min-h-[260px]"
+        onclick="triggerFilePick()"
+        class="border-2 border-dashed border-zinc-800 bg-brand-card/60 hover:bg-brand-card hover:border-orange-500/60 rounded-2xl p-8 flex flex-col items-center justify-center text-center transition-all cursor-pointer relative min-h-[250px] group"
       >
-        <input type="file" id="fileInput" multiple class="hidden" onchange="handleFileSelect(event)" />
+        <input type="file" id="filePicker" multiple class="hidden" onchange="handleFileChosen(event)" />
         
-        <div class="w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-temu-orange group-hover:scale-105 transition mb-4 shadow-inner">
-          <i data-lucide="upload-cloud" class="w-7 h-7"></i>
+        <div class="w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-orange-400 group-hover:scale-110 transition duration-200 mb-3 shadow-inner">
+          <i data-lucide="upload-cloud" class="w-8 h-8"></i>
         </div>
 
-        <h3 class="text-base font-bold text-white mb-1">Pilih atau Seret File Apapun ke Sini</h3>
-        <p class="text-xs font-mono text-zinc-500 max-w-xs mb-4">Video 4K, ZIP raksasa, Foto, APK, Dokumen — Langsung tembak ke perangkat target</p>
+        <h3 class="text-base font-bold text-white mb-1">Klik atau Tarik File ke Sini</h3>
+        <p class="text-xs text-zinc-400 max-w-sm mb-4">Mendukung Video 4K, ZIP raksasa, Foto Full HD, APK, dan file ukuran puluhan GB tanpa batas.</p>
 
-        <button 
-          onclick="document.getElementById('fileInput').click()" 
-          class="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-mono text-xs font-semibold transition border border-zinc-700 flex items-center gap-2"
-        >
-          <i data-lucide="folder" class="w-3.5 h-3.5 text-temu-orange"></i>
-          Jelajahi File
-        </button>
+        <span class="px-4 py-2 rounded-xl bg-zinc-800 group-hover:bg-orange-500 group-hover:text-black font-semibold text-xs transition border border-zinc-700">
+          Pilih File dari Penyimpanan
+        </span>
       </div>
 
-      <!-- Active Transfers & Received Files Monitor -->
-      <div class="border border-temu-border bg-temu-panel rounded-xl p-5 flex-1 flex flex-col shadow-2xl">
-        <div class="flex items-center justify-between mb-3 border-b border-temu-border/60 pb-3">
+      <!-- TRANSFER MONITOR -->
+      <div class="bg-brand-card border border-brand-border rounded-2xl p-5 flex-1 flex flex-col shadow-xl">
+        <div class="flex items-center justify-between pb-3 border-b border-zinc-800/80 mb-3">
           <div class="flex items-center gap-2">
-            <i data-lucide="activity" class="w-4 h-4 text-temu-orange"></i>
-            <span class="text-xs font-mono uppercase tracking-wider text-zinc-300 font-bold">Log Transfer File</span>
+            <i data-lucide="arrow-left-right" class="w-4 h-4 text-orange-400"></i>
+            <span class="text-xs font-bold uppercase tracking-wider text-white">Aktivitas Transfer File</span>
           </div>
-          <span id="transferCount" class="text-[10px] font-mono bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded">0 Selesai</span>
+          <span id="transferBadgeCount" class="text-[10px] font-mono bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded">0 Transfer</span>
         </div>
 
-        <div id="emptyLogState" class="flex-1 flex flex-col items-center justify-center py-10 text-zinc-600">
-          <i data-lucide="inbox" class="w-8 h-8 stroke-1 mb-2 opacity-60"></i>
-          <p class="text-xs font-mono">Belum ada file dikirim atau diterima</p>
+        <div id="emptyTransferState" class="flex-1 flex flex-col items-center justify-center py-12 text-zinc-500">
+          <i data-lucide="package-open" class="w-9 h-9 stroke-1 mb-2 opacity-50"></i>
+          <p class="text-xs font-mono">Belum ada file dikirim / diterima</p>
         </div>
 
-        <div id="transferList" class="space-y-3 custom-scrollbar overflow-y-auto max-h-[320px] pr-1 hidden">
-          <!-- Item Card Injected via JS -->
+        <div id="transferQueue" class="space-y-3 custom-scroll overflow-y-auto max-h-[340px] pr-1 hidden">
+          <!-- Item Card di-inject via JavaScript -->
         </div>
       </div>
 
@@ -223,22 +215,21 @@
 
   </main>
 
-  <footer class="border-t border-temu-border/40 py-3 text-center text-[10px] font-mono text-zinc-600">
-    AIRDROP FROM TEMU // NO SUBSCRIPTION REQUIRED // DIRECT WebRTC DATASTREAM
+  <footer class="border-t border-brand-border/40 py-3 text-center text-xs font-mono text-zinc-500">
+    ⚡ DIRECT WebRTC ENGINE // 100% PRIVATE // ZERO-COMPRESSION
   </footer>
 
-  <!-- SCRIPT LOGIC -->
+  <!-- CORE LOGIC & HIGH PERFORMANCE ENGINE -->
   <script>
-    // Audio FX using Web Audio API (Hardware Click & Tone Feedback)
+    // Inisialisasi Audio FX (Feedback suara)
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playBeep(freq = 600, duration = 0.08) {
       try {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
@@ -247,323 +238,365 @@
       } catch (e) {}
     }
 
-    // App State
+    // STATE MESIN TRANSFER
     let peer = null;
-    let activeConnection = null;
-    let myCustomCode = null;
-    let incomingFileInfo = null;
+    let activeConn = null;
+    let dataChannel = null;
+    let myPIN = null;
+
+    // HIGH SPEED CONSTANTS
+    const CHUNK_SIZE = 64 * 1024; // 64 KB (Sweet spot WebRTC transfer tercepat)
+    const MAX_BUFFERED_AMOUNT = 4 * 1024 * 1024; // 4MB Buffer cap agar RAM tidak meledak
+
+    // Tracking Incoming File (Download)
+    let incomingFile = null;
     let receivedChunks = [];
     let receivedBytes = 0;
-    const CHUNK_SIZE = 16384 * 2; // 32KB per chunk for smooth WebRTC pipe
+    let downloadStartTime = 0;
+    let lastUiUpdate = 0;
 
-    // Init Lucide
     lucide.createIcons();
 
-    // 1. Generate clean 5-digit ID
-    function generatePin() {
-      return Math.floor(10000 + Math.random() * 90000).toString();
-    }
+    // 1. Inisialisasi PeerJS
+    function init() {
+      myPIN = Math.floor(10000 + Math.random() * 90000).toString();
+      const peerId = `airdrop-v2-${myPIN}`;
 
-    // 2. Initialize PeerJS
-    function initPeer() {
-      myCustomCode = generatePin();
-      const peerId = `temu-airdrop-${myCustomCode}`;
-      
       peer = new Peer(peerId, {
         debug: 1,
         config: {
           iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:global.stun.twilio.com:3478' }
+            { urls: 'stun:stun1.l.google.com:19302' }
           ]
         }
       });
 
       peer.on('open', (id) => {
-        document.getElementById('myCode').innerText = myCustomCode;
-        updateStatus(true, "Siap Terhubung");
-        generateQRCode(myCustomCode);
+        document.getElementById('myPin').innerText = myPIN;
+        setConnectionStatus(true, "Siap Terhubung");
+        generateQR(myPIN);
 
-        // Auto-connect if pairing param is in URL (?pair=12345)
-        const params = new URLSearchParams(window.location.search);
-        const pairTarget = params.get('pair');
-        if (pairTarget && pairTarget !== myCustomCode) {
-          document.getElementById('targetCodeInput').value = pairTarget;
-          setTimeout(() => connectToCode(pairTarget), 600);
+        // Jika URL memiliki parameter ?pair=XXXXX langsung sambungkan
+        const urlParam = new URLSearchParams(window.location.search).get('pair');
+        if (urlParam && urlParam !== myPIN) {
+          document.getElementById('targetPinInput').value = urlParam;
+          setTimeout(() => connectToRemote(urlParam), 500);
         }
       });
 
       peer.on('connection', (conn) => {
-        setupConnection(conn);
+        bindConnectionEvents(conn);
       });
 
       peer.on('error', (err) => {
         console.error("Peer Error: ", err);
-        updateStatus(false, "Koneksi Error");
+        setConnectionStatus(false, "Koneksi Error");
       });
     }
 
-    function updateStatus(online, text) {
-      const dot = document.getElementById('statusDot');
-      const label = document.getElementById('statusText');
+    function setConnectionStatus(isReady, text) {
+      const dot = document.getElementById('connDot');
+      const label = document.getElementById('connLabel');
       label.innerText = text;
-      if (online) {
-        dot.className = "w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10B981]";
+      if (isReady) {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10B981]";
       } else {
-        dot.className = "w-2 h-2 rounded-full bg-amber-500 animate-pulse";
+        dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse";
       }
     }
 
-    // 3. Connect to Target Code
-    function connectToPeer(e) {
-      if (e) e.preventDefault();
-      const code = document.getElementById('targetCodeInput').value.trim();
-      if (!code || code.length < 5) {
-        alert("Masukkan 5 digit kode yang valid!");
+    // 2. Hubungkan ke Peer Lain
+    function handleManualConnect(e) {
+      e.preventDefault();
+      const targetPin = document.getElementById('targetPinInput').value.trim();
+      if (!targetPin || targetPin.length !== 5) {
+        alert("Masukkan 5-digit PIN yang valid!");
         return;
       }
-      connectToCode(code);
+      connectToRemote(targetPin);
     }
 
-    function connectToCode(code) {
-      playBeep(800, 0.05);
-      updateStatus(false, `Menghubungkan ke ${code}...`);
-      const targetPeerId = `temu-airdrop-${code}`;
-      const conn = peer.connect(targetPeerId, { reliable: true });
-      setupConnection(conn);
+    function connectToRemote(targetPin) {
+      playBeep(700, 0.05);
+      setConnectionStatus(false, `Menyambungkan #${targetPin}...`);
+      
+      const conn = peer.connect(`airdrop-v2-${targetPin}`, {
+        reliable: true
+      });
+      bindConnectionEvents(conn);
     }
 
-    // 4. Handle Active WebRTC Connection
-    function setupConnection(conn) {
-      activeConnection = conn;
+    // 3. Event Handler Koneksi & Setup Raw DataChannel
+    function bindConnectionEvents(conn) {
+      activeConn = conn;
 
       conn.on('open', () => {
         playBeep(1200, 0.15);
-        const partnerCode = conn.peer.replace('temu-airdrop-', '');
-        updateStatus(true, "Perangkat Terkait!");
+        const partnerPin = conn.peer.replace('airdrop-v2-', '');
         
-        document.getElementById('activePeerBox').classList.remove('hidden');
-        document.getElementById('connectedPeerName').innerText = `Terhubung dengan [${partnerCode}]`;
-        document.getElementById('targetCodeInput').value = partnerCode;
+        // Akses langsung RTCDataChannel asli untuk transmisi cepat
+        dataChannel = conn.dataChannel;
+        dataChannel.binaryType = 'arraybuffer';
+
+        setConnectionStatus(true, "Tersambung!");
+        document.getElementById('activePeerBadge').classList.remove('hidden');
+        document.getElementById('connectedDeviceText').innerText = `Tersambung dengan #${partnerPin}`;
+        document.getElementById('targetPinInput').value = partnerPin;
       });
 
+      // Menerima data mentah
       conn.on('data', (data) => {
-        handleIncomingData(data);
+        handleRawData(data);
       });
 
       conn.on('close', () => {
         playBeep(400, 0.2);
-        activeConnection = null;
-        updateStatus(true, "Koneksi Terputus");
-        document.getElementById('activePeerBox').classList.add('hidden');
+        activeConn = null;
+        dataChannel = null;
+        setConnectionStatus(true, "Koneksi Terputus");
+        document.getElementById('activePeerBadge').classList.add('hidden');
       });
     }
 
     function disconnectPeer() {
-      if (activeConnection) {
-        activeConnection.close();
-      }
+      if (activeConn) activeConn.close();
     }
 
-    // 5. Send File System (Chunked)
+    // 4. ALGORITMA PENGIRIMAN SUPER CEPAT (ASYNC + STREAMING BACKPRESSURE)
+    function triggerFilePick() {
+      document.getElementById('filePicker').click();
+    }
+
+    function handleFileChosen(e) {
+      if (e.target.files.length) startSendingFiles(e.target.files);
+    }
+
     function handleDragOver(e) {
       e.preventDefault();
-      document.getElementById('dropZone').classList.add('border-temu-orange', 'bg-temu-panel');
+      document.getElementById('dropZone').classList.add('border-orange-500', 'bg-brand-card');
     }
 
     function handleDragLeave(e) {
       e.preventDefault();
-      document.getElementById('dropZone').classList.remove('border-temu-orange');
+      document.getElementById('dropZone').classList.remove('border-orange-500');
     }
 
-    function handleFileDrop(e) {
+    function handleDrop(e) {
       e.preventDefault();
-      document.getElementById('dropZone').classList.remove('border-temu-orange');
+      document.getElementById('dropZone').classList.remove('border-orange-500');
       if (e.dataTransfer.files.length) {
-        processFiles(e.dataTransfer.files);
+        startSendingFiles(e.dataTransfer.files);
       }
     }
 
-    function handleFileSelect(e) {
-      if (e.target.files.length) {
-        processFiles(e.target.files);
-      }
-    }
-
-    function processFiles(files) {
-      if (!activeConnection || !activeConnection.open) {
-        alert("Hubungkan perangkat terlebih dahulu dengan kode!");
+    async function startSendingFiles(files) {
+      if (!activeConn || !activeConn.open) {
+        alert("⚠️ Hubungkan perangkat Anda terlebih dahulu dengan memasukkan PIN teman!");
         return;
       }
 
-      Array.from(files).forEach(file => {
-        sendFile(file);
-      });
+      for (const file of Array.from(files)) {
+        await transferSingleFile(file);
+      }
     }
 
-    function sendFile(file) {
-      const transferId = 'tx-' + Math.random().toString(36).substr(2, 9);
-      createTransferItem(transferId, file.name, file.size, 'upload');
+    // Pipeline Pengiriman Tanpa Beban Serialization
+    async function transferSingleFile(file) {
+      const fileId = 'tx-' + Math.random().toString(36).substring(2, 9);
+      renderQueueCard(fileId, file.name, file.size, 'upload');
 
-      // Send Meta Handshake
-      activeConnection.send({
-        type: 'meta',
-        id: transferId,
+      // 1. Kirim Metadata kecil (Handshake)
+      activeConn.send({
+        __type: 'file-meta',
+        id: fileId,
         name: file.name,
         size: file.size,
         fileType: file.type
       });
 
       let offset = 0;
-      const reader = new FileReader();
+      const startTime = performance.now();
+      let lastUiTick = 0;
 
-      function readNextChunk() {
-        const slice = file.slice(offset, offset + CHUNK_SIZE);
-        reader.readAsArrayBuffer(slice);
-      }
-
-      reader.onload = (e) => {
-        if (!activeConnection) return;
-        
-        activeConnection.send({
-          type: 'chunk',
-          id: transferId,
-          data: e.target.result
-        });
-
-        offset += e.target.result.byteLength;
-        const progress = Math.round((offset / file.size) * 100);
-        updateProgress(transferId, progress);
-
-        if (offset < file.size) {
-          // Keep sending smoothly without choking buffer
-          if (activeConnection.dataChannel && activeConnection.dataChannel.bufferedAmount > 8 * 1024 * 1024) {
-            setTimeout(readNextChunk, 50);
-          } else {
-            readNextChunk();
-          }
-        } else {
-          // Done
-          activeConnection.send({ type: 'done', id: transferId });
-          markTransferComplete(transferId, 'upload');
-          playBeep(900, 0.1);
+      // 2. Loop Binary Stream
+      while (offset < file.size) {
+        // Kontrol Backpressure: Jika antrean buffer WebRTC melebihi batas, tahan sebentar sampai buffer kosong
+        if (dataChannel.bufferedAmount > MAX_BUFFERED_AMOUNT) {
+          await new Promise((resolve) => {
+            dataChannel.onbufferedamountlow = () => {
+              dataChannel.onbufferedamountlow = null;
+              resolve();
+            };
+          });
         }
-      };
 
-      readNextChunk();
+        const slice = file.slice(offset, offset + CHUNK_SIZE);
+        const arrayBuffer = await slice.arrayBuffer();
+        
+        // Kirim LANGSUNG byte array mentah (Zero Overhead)
+        dataChannel.send(arrayBuffer);
+        offset += arrayBuffer.byteLength;
+
+        // Update UI secara halus tanpa bikin lag (Throttled per 100ms)
+        const now = performance.now();
+        if (now - lastUiTick > 100 || offset === file.size) {
+          const progress = Math.round((offset / file.size) * 100);
+          const elapsedSec = (now - startTime) / 1000;
+          const speedBps = offset / (elapsedSec || 0.001); // Bytes per detik
+          updateTransferUI(fileId, progress, speedBps);
+          lastUiTick = now;
+        }
+      }
+
+      // 3. Kirim sinyal Selesai
+      activeConn.send({ __type: 'file-done', id: fileId });
+      finishTransferUI(fileId, 'upload');
+      playBeep(1000, 0.1);
     }
 
-    // 6. Receive File Handlers
-    function handleIncomingData(payload) {
-      if (payload.type === 'meta') {
-        incomingFileInfo = payload;
-        receivedChunks = [];
-        receivedBytes = 0;
-        createTransferItem(payload.id, payload.name, payload.size, 'download');
-      } 
-      else if (payload.type === 'chunk') {
-        receivedChunks.push(payload.data);
-        receivedBytes += payload.data.byteLength;
-        const progress = Math.round((receivedBytes / incomingFileInfo.size) * 100);
-        updateProgress(payload.id, progress);
-      } 
-      else if (payload.type === 'done') {
-        const fileBlob = new Blob(receivedChunks, { type: incomingFileInfo.fileType || 'application/octet-stream' });
-        const downloadUrl = URL.createObjectURL(fileBlob);
-        
-        markTransferComplete(incomingFileInfo.id, 'download', downloadUrl, incomingFileInfo.name);
-        playBeep(1400, 0.2);
+    // 5. ALGORITMA PENERIMAAN SUPER CEPAT
+    function handleRawData(data) {
+      // Cek apakah data adalah kontrol metadata (Objek JSON)
+      if (typeof data === 'object' && data.__type) {
+        if (data.__type === 'file-meta') {
+          incomingFile = data;
+          receivedChunks = [];
+          receivedBytes = 0;
+          downloadStartTime = performance.now();
+          lastUiUpdate = 0;
+          renderQueueCard(data.id, data.name, data.size, 'download');
+        } 
+        else if (data.__type === 'file-done') {
+          // File selesai diterima -> Buat Blob & trigger download
+          const blob = new Blob(receivedChunks, { type: incomingFile.fileType || 'application/octet-stream' });
+          const url = URL.createObjectURL(blob);
+          
+          finishTransferUI(incomingFile.id, 'download', url, incomingFile.name);
+          playBeep(1300, 0.2);
 
-        // Auto Trigger Download on mobile/desktop
-        const autoDownloadLink = document.createElement('a');
-        autoDownloadLink.href = downloadUrl;
-        autoDownloadLink.download = incomingFileInfo.name;
-        document.body.appendChild(autoDownloadLink);
-        autoDownloadLink.click();
-        document.body.removeChild(autoDownloadLink);
+          // Otomatis download file
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = incomingFile.name;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+
+          // Bebaskan memori
+          receivedChunks = [];
+          incomingFile = null;
+        }
+        return;
+      }
+
+      // Jika data adalah Raw ArrayBuffer (Isi File)
+      if (data instanceof ArrayBuffer && incomingFile) {
+        receivedChunks.push(data);
+        receivedBytes += data.byteLength;
+
+        const now = performance.now();
+        if (now - lastUiUpdate > 100 || receivedBytes === incomingFile.size) {
+          const progress = Math.round((receivedBytes / incomingFile.size) * 100);
+          const elapsedSec = (now - downloadStartTime) / 1000;
+          const speedBps = receivedBytes / (elapsedSec || 0.001);
+          updateTransferUI(incomingFile.id, progress, speedBps);
+          lastUiUpdate = now;
+        }
       }
     }
 
-    // 7. UI Helpers (Transfers, QR, Copy)
-    function createTransferItem(id, name, size, direction) {
-      document.getElementById('emptyLogState').classList.add('hidden');
-      const list = document.getElementById('transferList');
-      list.classList.remove('hidden');
+    // 6. UI HELPERS & RENDERER
+    function renderQueueCard(id, name, size, direction) {
+      document.getElementById('emptyTransferState').classList.add('hidden');
+      const queue = document.getElementById('transferQueue');
+      queue.classList.remove('hidden');
 
       const isUpload = direction === 'upload';
-      const formattedSize = formatBytes(size);
+      const formattedSize = formatSize(size);
 
-      const itemHtml = `
-        <div id="${id}" class="bg-black/40 border border-zinc-800/80 rounded-lg p-3 text-xs font-mono">
+      const html = `
+        <div id="${id}" class="bg-black/50 border border-zinc-800/90 rounded-xl p-3.5 text-xs font-mono">
           <div class="flex items-center justify-between mb-2">
-            <div class="flex items-center space-x-2 truncate max-w-[200px] md:max-w-xs">
-              <i data-lucide="${isUpload ? 'arrow-up-right' : 'arrow-down-left'}" class="w-4 h-4 ${isUpload ? 'text-temu-orange' : 'text-emerald-400'} shrink-0"></i>
+            <div class="flex items-center gap-2 truncate max-w-[220px] md:max-w-sm">
+              <i data-lucide="${isUpload ? 'arrow-up-right' : 'arrow-down-left'}" class="w-4 h-4 ${isUpload ? 'text-orange-400' : 'text-emerald-400'} shrink-0"></i>
               <span class="truncate text-white font-medium">${name}</span>
             </div>
-            <span class="text-zinc-500 text-[10px] shrink-0">${formattedSize}</span>
+            <span class="text-zinc-400 text-[11px] shrink-0">${formattedSize}</span>
           </div>
 
-          <div class="w-full bg-zinc-800 rounded-full h-1.5 overflow-hidden">
-            <div id="${id}-bar" class="bg-temu-orange h-full rounded-full transition-all duration-100" style="width: 0%"></div>
+          <!-- Bar Progress -->
+          <div class="w-full bg-zinc-800 rounded-full h-2 overflow-hidden mb-2">
+            <div id="${id}-bar" class="bg-orange-500 h-full rounded-full transition-all duration-75" style="width: 0%"></div>
           </div>
 
-          <div class="flex justify-between items-center mt-2 text-[10px] text-zinc-500">
+          <!-- Speed & ETA Tracker -->
+          <div class="flex justify-between items-center text-[10px] text-zinc-400">
             <span id="${id}-status">${isUpload ? 'Mengirim...' : 'Menerima...'}</span>
-            <span id="${id}-percent" class="font-bold text-zinc-400">0%</span>
+            <div class="flex gap-2 font-mono">
+              <span id="${id}-speed" class="text-zinc-300">0 MB/s</span>
+              <span id="${id}-percent" class="font-bold text-white">0%</span>
+            </div>
           </div>
         </div>
       `;
-      list.insertAdjacentHTML('afterbegin', itemHtml);
+      queue.insertAdjacentHTML('afterbegin', html);
       lucide.createIcons();
     }
 
-    function updateProgress(id, percent) {
+    function updateTransferUI(id, percent, speedBytesPerSec) {
       const bar = document.getElementById(`${id}-bar`);
-      const pctLabel = document.getElementById(`${id}-percent`);
+      const pct = document.getElementById(`${id}-percent`);
+      const speed = document.getElementById(`${id}-speed`);
+
       if (bar) bar.style.width = `${percent}%`;
-      if (pctLabel) pctLabel.innerText = `${percent}%`;
+      if (pct) pct.innerText = `${percent}%`;
+      if (speed) speed.innerText = `${formatSize(speedBytesPerSec)}/s`;
     }
 
-    function markTransferComplete(id, direction, downloadUrl = null, fileName = null) {
-      const statusLabel = document.getElementById(`${id}-status`);
+    function finishTransferUI(id, direction, downloadUrl = null, fileName = null) {
       const bar = document.getElementById(`${id}-bar`);
-      
+      const status = document.getElementById(`${id}-status`);
+      const speed = document.getElementById(`${id}-speed`);
+      const pct = document.getElementById(`${id}-percent`);
+
       if (bar) {
         bar.style.width = '100%';
         bar.className = 'bg-emerald-500 h-full rounded-full';
       }
+      if (pct) pct.innerText = '100%';
+      if (speed) speed.innerText = 'Selesai';
 
-      if (statusLabel) {
+      if (status) {
         if (direction === 'download' && downloadUrl) {
-          statusLabel.innerHTML = `
-            <a href="${downloadUrl}" download="${fileName}" class="text-emerald-400 font-bold underline flex items-center gap-1">
-              File Tersimpan (Download Ulang)
+          status.innerHTML = `
+            <a href="${downloadUrl}" download="${fileName}" class="text-emerald-400 font-bold hover:underline flex items-center gap-1">
+              ✓ Berhasil Disimpan (Download Ulang)
             </a>`;
         } else {
-          statusLabel.innerHTML = `<span class="text-emerald-400 font-bold">✓ Terkirim Berhasil</span>`;
+          status.innerHTML = `<span class="text-emerald-400 font-bold">✓ Terkirim Sukses</span>`;
         }
       }
 
-      // Update counter
-      const counter = document.getElementById('transferCount');
-      const current = parseInt(counter.innerText) || 0;
-      counter.innerText = `${current + 1} Selesai`;
+      // Update badge jumlah transfer
+      const badge = document.getElementById('transferBadgeCount');
+      const count = (parseInt(badge.innerText) || 0) + 1;
+      badge.innerText = `${count} Selesai`;
     }
 
-    function formatBytes(bytes, decimals = 2) {
+    function formatSize(bytes) {
       if (!+bytes) return '0 B';
       const k = 1024;
-      const dm = decimals < 0 ? 0 : decimals;
       const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
       const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+      return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
     }
 
-    function generateQRCode(code) {
-      const url = `${window.location.origin}${window.location.pathname}?pair=${code}`;
-      const qrEl = document.getElementById('qrcode');
-      qrEl.innerHTML = '';
-      new QRCode(qrEl, {
+    function generateQR(pin) {
+      const url = `${window.location.origin}${window.location.pathname}?pair=${pin}`;
+      const qrContainer = document.getElementById('qrcode');
+      qrContainer.innerHTML = '';
+      new QRCode(qrContainer, {
         text: url,
         width: 140,
         height: 140,
@@ -574,28 +607,28 @@
     }
 
     function toggleQR() {
-      const qrBox = document.getElementById('qrContainer');
-      const chevron = document.getElementById('qrChevron');
-      qrBox.classList.toggle('hidden');
-      chevron.classList.toggle('rotate-180');
+      const wrapper = document.getElementById('qrWrapper');
+      const icon = document.getElementById('qrIcon');
+      wrapper.classList.toggle('hidden');
+      icon.classList.toggle('rotate-180');
     }
 
-    function copyLink() {
-      const shareUrl = `${window.location.origin}${window.location.pathname}?pair=${myCustomCode}`;
-      navigator.clipboard.writeText(shareUrl).then(() => {
-        playBeep(1000, 0.08);
+    function copyShareLink() {
+      const link = `${window.location.origin}${window.location.pathname}?pair=${myPIN}`;
+      navigator.clipboard.writeText(link).then(() => {
+        playBeep(900, 0.05);
         const btn = document.getElementById('copyBtn');
-        btn.classList.add('bg-temu-orange', 'text-black');
+        const oldText = btn.innerHTML;
+        btn.innerHTML = `<i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Tersalin!`;
+        lucide.createIcons();
         setTimeout(() => {
-          btn.classList.remove('bg-temu-orange', 'text-black');
-        }, 800);
+          btn.innerHTML = oldText;
+          lucide.createIcons();
+        }, 1200);
       });
     }
 
-    // Kickoff Peer
-    window.addEventListener('DOMContentLoaded', () => {
-      initPeer();
-    });
+    window.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
 </html>
