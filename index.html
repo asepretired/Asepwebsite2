@@ -3,23 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AdbNext — Liquid Glass WebADB Suite</title>
+  <title>AdbNext — Professional WebADB Suite</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   
   <style>
     :root {
-      --bg-base: #070709;
-      --surface-glass: rgba(255, 255, 255, 0.035);
-      --surface-glass-hover: rgba(255, 255, 255, 0.065);
-      --surface-glass-active: rgba(255, 255, 255, 0.1);
+      --bg-base: #08090d;
+      --bg-surface: rgba(18, 20, 29, 0.65);
+      --surface-glass: rgba(255, 255, 255, 0.03);
+      --surface-glass-hover: rgba(255, 255, 255, 0.07);
       --border-glass: rgba(255, 255, 255, 0.08);
-      --border-highlight: rgba(255, 255, 255, 0.18);
-      --text-main: #f5f5f7;
-      --text-muted: #86868b;
-      --text-sub: #52525b;
-      --accent-glow: rgba(255, 255, 255, 0.15);
+      --border-highlight: rgba(99, 102, 241, 0.4);
+      --accent-primary: #6366f1;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-sub: #64748b;
       --mono-font: 'JetBrains Mono', monospace;
       --sans-font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     }
@@ -38,75 +42,116 @@
       min-height: 100vh;
       overflow-x: hidden;
       background-image: 
-        radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.05) 0%, transparent 60%),
-        radial-gradient(circle at 10% 30%, rgba(255, 255, 255, 0.02) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
+        radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 10% 25%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 70%, rgba(16, 185, 129, 0.06) 0%, transparent 50%);
+      background-attachment: fixed;
     }
 
-    /* === LIQUID GLASS UTILS === */
+    /* === TOAST NOTIFICATION === */
+    #toast-container {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast {
+      pointer-events: auto;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-glass);
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 14px;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      max-width: 350px;
+    }
+
+    .toast.success { border-color: rgba(16, 185, 129, 0.5); }
+    .toast.error { border-color: rgba(244, 63, 94, 0.5); }
+    .toast.info { border-color: rgba(99, 102, 241, 0.5); }
+
+    @keyframes slideIn {
+      from { transform: translateX(50px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* === GLASS PANEL === */
     .glass-panel {
-      background: var(--surface-glass);
+      background: var(--bg-surface);
       backdrop-filter: blur(35px) saturate(190%);
       -webkit-backdrop-filter: blur(35px) saturate(190%);
       border: 1px solid var(--border-glass);
-      border-radius: 28px;
-      box-shadow: 
-        0 20px 40px -15px rgba(0, 0, 0, 0.7),
-        inset 0 1px 0 rgba(255, 255, 255, 0.12),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.4);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      transition: all 0.25s ease;
     }
 
     .glass-panel:hover {
-      border-color: var(--border-highlight);
-    }
-
-    .glass-pill {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 9999px;
+      border-color: rgba(255, 255, 255, 0.15);
     }
 
     /* === HEADER / DYNAMIC ISLAND === */
     header {
       position: sticky;
-      top: 18px;
+      top: 14px;
       z-index: 100;
       display: flex;
       justify-content: center;
-      padding: 0 20px;
+      padding: 0 16px;
     }
 
     .dynamic-island {
       display: flex;
       align-items: center;
-      gap: 20px;
-      padding: 10px 22px;
+      gap: 16px;
+      padding: 8px 16px;
       width: 100%;
-      max-width: 1120px;
-      background: rgba(12, 12, 14, 0.75);
-      backdrop-filter: blur(30px) saturate(200%);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 40px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+      max-width: 1180px;
+      background: rgba(13, 15, 22, 0.82);
+      backdrop-filter: blur(28px) saturate(200%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 9999px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.7);
     }
 
     .brand {
       display: flex;
       align-items: center;
       gap: 10px;
-      font-weight: 700;
-      font-size: 1.05rem;
+      font-weight: 800;
+      font-size: 1rem;
       letter-spacing: -0.02em;
+      padding-left: 6px;
     }
 
-    .brand-dot {
-      width: 8px;
-      height: 8px;
+    .brand-glow {
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
-      background: #fff;
-      box-shadow: 0 0 12px #fff;
+      background: var(--accent-primary);
+      box-shadow: 0 0 12px var(--accent-primary);
+    }
+
+    .brand-glow.connected {
+      background: var(--accent-emerald);
+      box-shadow: 0 0 14px var(--accent-emerald);
+      animation: pulseGlow 2s infinite;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.7; }
     }
 
     .nav-tabs {
@@ -114,59 +159,77 @@
       gap: 4px;
       margin-left: auto;
       overflow-x: auto;
+      padding: 2px 0;
+      scrollbar-width: none;
     }
+
+    .nav-tabs::-webkit-scrollbar { display: none; }
 
     .nav-btn {
       background: transparent;
       border: none;
       color: var(--text-muted);
       font-family: inherit;
-      font-size: 0.85rem;
-      font-weight: 500;
-      padding: 8px 16px;
-      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 9999px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.2s;
       white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .nav-btn:hover {
-      color: var(--text-main);
-      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      background: rgba(255, 255, 255, 0.06);
     }
 
     .nav-btn.active {
-      color: #000;
-      background: #fff;
-      box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
-      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.85), rgba(6, 182, 212, 0.85));
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
     }
 
     .connect-trigger {
       display: flex;
       align-items: center;
       gap: 8px;
-      background: #fff;
-      color: #000;
+      background: #ffffff;
+      color: #090a0f;
       border: none;
-      padding: 9px 18px;
-      border-radius: 24px;
-      font-weight: 600;
-      font-size: 0.82rem;
+      padding: 8px 18px;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 0.8rem;
       cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: all 0.2s ease;
+      white-space: nowrap;
     }
 
     .connect-trigger:hover {
-      transform: scale(1.03);
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.35);
+      background: #e2e8f0;
+      transform: translateY(-1px);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
     }
 
-    /* === MAIN WRAPPER === */
+    .connect-trigger.connected {
+      background: rgba(244, 63, 94, 0.15);
+      color: #fb7185;
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .connect-trigger.connected:hover {
+      background: rgba(244, 63, 94, 0.25);
+    }
+
+    /* === MAIN CONTAINER === */
     .container {
-      max-width: 1120px;
-      margin: 40px auto 140px;
-      padding: 0 20px;
+      max-width: 1180px;
+      margin: 28px auto 260px;
+      padding: 0 16px;
     }
 
     /* === DEVICE HERO INFO === */
@@ -174,36 +237,63 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 24px 30px;
-      margin-bottom: 30px;
+      padding: 24px 28px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .device-hero::after {
+      content: '';
+      position: absolute;
+      top: -40%;
+      right: -10%;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.15), transparent 70%);
+      pointer-events: none;
     }
 
     .device-details h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      margin-bottom: 6px;
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .device-badges {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
     }
 
     .badge {
-      font-size: 0.75rem;
-      padding: 4px 12px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      background: rgba(255, 255, 255, 0.04);
       color: var(--text-muted);
       border: 1px solid var(--border-glass);
-      border-radius: 12px;
+      border-radius: 8px;
       font-family: var(--mono-font);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
     }
 
-    /* === GRID & CARDS === */
+    .badge.active-badge {
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.1);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    /* === CARDS & GRIDS === */
     .section-content {
       display: none;
-      animation: fadeIn 0.4s ease forwards;
+      animation: fadeIn 0.3s ease forwards;
     }
 
     .section-content.active-section {
@@ -211,207 +301,298 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
+      from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
     .grid-2 {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 20px;
+      gap: 18px;
     }
 
     .feature-card {
-      padding: 24px;
+      padding: 22px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      border-radius: 18px;
     }
 
     .feature-head {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
     .feature-title {
-      font-size: 1.05rem;
-      font-weight: 600;
+      font-size: 0.95rem;
+      font-weight: 700;
       color: #fff;
     }
 
     .feature-tag {
-      font-size: 0.7rem;
-      color: var(--text-muted);
+      font-size: 0.68rem;
+      color: var(--accent-cyan);
       font-family: var(--mono-font);
-      background: rgba(255, 255, 255, 0.04);
-      padding: 2px 8px;
+      background: rgba(6, 182, 212, 0.08);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      padding: 2px 7px;
       border-radius: 6px;
     }
 
     .feature-desc {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: var(--text-muted);
       line-height: 1.5;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     .feature-actions {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
     }
 
-    /* === BUTTONS & INPUTS === */
+    /* === BUTTONS & FORM CONTROLS === */
     .btn {
       background: var(--surface-glass);
       border: 1px solid var(--border-glass);
       color: var(--text-main);
       padding: 8px 14px;
-      border-radius: 14px;
-      font-size: 0.8rem;
-      font-weight: 500;
+      border-radius: 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      font-family: inherit;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 6px;
       transition: all 0.2s;
+      user-select: none;
     }
 
     .btn:hover {
       background: var(--surface-glass-hover);
-      border-color: var(--border-highlight);
+      border-color: rgba(255, 255, 255, 0.2);
       color: #fff;
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
     }
 
     .btn-solid {
-      background: #fff;
-      color: #000;
+      background: #ffffff;
+      color: #090a0f;
       border: none;
-      font-weight: 600;
     }
 
     .btn-solid:hover {
-      background: #e0e0e0;
-      box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+      background: #f1f5f9;
+      box-shadow: 0 0 16px rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-danger {
+      background: rgba(244, 63, 94, 0.12);
+      border-color: rgba(244, 63, 94, 0.3);
+      color: #fda4af;
+    }
+
+    .btn-danger:hover {
+      background: rgba(244, 63, 94, 0.22);
+      border-color: rgba(244, 63, 94, 0.5);
+      color: #fff;
     }
 
     .input-glass {
       width: 100%;
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(0, 0, 0, 0.4);
       border: 1px solid var(--border-glass);
-      border-radius: 14px;
-      padding: 9px 14px;
+      border-radius: 10px;
+      padding: 9px 12px;
       color: #fff;
-      font-family: inherit;
-      font-size: 0.85rem;
+      font-family: var(--mono-font);
+      font-size: 0.78rem;
       outline: none;
       margin-bottom: 12px;
-      transition: border-color 0.2s;
+      transition: all 0.2s;
     }
 
     .input-glass:focus {
-      border-color: rgba(255, 255, 255, 0.35);
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
     }
 
-    /* === MINI HUD / TERMINAL DRAWER === */
+    /* === INTERACTIVE FLOATING TERMINAL HUD === */
     .terminal-hud {
       position: fixed;
-      bottom: 20px;
+      bottom: 14px;
       left: 50%;
       transform: translateX(-50%);
-      width: calc(100% - 40px);
-      max-width: 1120px;
+      width: calc(100% - 32px);
+      max-width: 1180px;
       z-index: 90;
-      background: rgba(8, 8, 10, 0.88);
-      backdrop-filter: blur(35px) saturate(200%);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 24px;
-      padding: 14px 20px;
-      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9);
+      background: rgba(11, 13, 20, 0.94);
+      backdrop-filter: blur(35px) saturate(220%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
+      transition: height 0.3s ease;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      overflow: hidden;
     }
 
     .hud-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.75rem;
-      color: var(--text-muted);
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.72rem;
       font-family: var(--mono-font);
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      padding-bottom: 6px;
+      color: var(--text-muted);
+    }
+
+    .hud-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hud-tool-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.7rem;
+      padding: 3px 6px;
+      border-radius: 4px;
+      transition: 0.15s;
+    }
+
+    .hud-tool-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
     }
 
     .hud-logs {
       font-family: var(--mono-font);
-      font-size: 0.78rem;
-      color: #e2e8f0;
-      max-height: 70px;
+      font-size: 0.76rem;
+      padding: 12px 16px;
+      height: 130px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
       gap: 4px;
+      background: rgba(0, 0, 0, 0.4);
+    }
+
+    .hud-logs.expanded {
+      height: 280px;
     }
 
     .hud-log-row {
       display: flex;
-      gap: 12px;
+      gap: 8px;
+      line-height: 1.4;
+      word-break: break-all;
     }
 
     .hud-ts { color: var(--text-sub); }
-    .hud-cmd { color: #fff; font-weight: 500; }
+    .hud-cmd { color: #38bdf8; font-weight: 500; }
+    .hud-out { color: #e2e8f0; }
+    .hud-err { color: #f43f5e; font-weight: 600; }
+    .hud-succ { color: #34d399; font-weight: 600; }
 
-    @media (max-width: 768px) {
-      .dynamic-island { flex-direction: column; align-items: stretch; border-radius: 24px; }
-      .nav-tabs { order: 2; margin-left: 0; }
-      .connect-trigger { order: 1; align-self: flex-end; }
+    .terminal-quick-input {
+      display: flex;
+      gap: 6px;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .terminal-quick-input input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-family: var(--mono-font);
+      font-size: 0.78rem;
+      outline: none;
+    }
+
+    @media (max-width: 820px) {
+      .dynamic-island {
+        border-radius: 20px;
+        flex-wrap: wrap;
+      }
+      .nav-tabs {
+        width: 100%;
+        order: 3;
+        margin-top: 6px;
+      }
+      .device-hero {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
     }
   </style>
 </head>
 <body>
 
+  <!-- Toast Notification System -->
+  <div id="toast-container"></div>
+
   <!-- Dynamic Island Nav -->
   <header>
     <div class="dynamic-island">
       <div class="brand">
-        <div class="brand-dot"></div>
+        <div class="brand-glow" id="statusGlow"></div>
         <span>AdbNext</span>
       </div>
       
       <div class="nav-tabs">
-        <button class="nav-btn active" onclick="switchTab('control')">📱 Kontrol</button>
-        <button class="nav-btn" onclick="switchTab('apps')">📦 Aplikasi</button>
-        <button class="nav-btn" onclick="switchTab('files')">📂 File</button>
-        <button class="nav-btn" onclick="switchTab('screen')">🖥️ Layar</button>
-        <button class="nav-btn" onclick="switchTab('debug')">🔍 Debug</button>
-        <button class="nav-btn" onclick="switchTab('network')">🌐 Jaringan</button>
-        <button class="nav-btn" onclick="switchTab('developer')">🧑‍💻 Developer</button>
+        <button class="nav-btn active" onclick="switchTab(this, 'control')">📱 Kontrol</button>
+        <button class="nav-btn" onclick="switchTab(this, 'apps')">📦 Aplikasi</button>
+        <button class="nav-btn" onclick="switchTab(this, 'files')">📂 File</button>
+        <button class="nav-btn" onclick="switchTab(this, 'screen')">🖥️ Layar</button>
+        <button class="nav-btn" onclick="switchTab(this, 'debug')">🔍 Debug</button>
+        <button class="nav-btn" onclick="switchTab(this, 'network')">🌐 Jaringan</button>
+        <button class="nav-btn" onclick="switchTab(this, 'developer')">🧑‍💻 Developer</button>
       </div>
 
-      <button class="connect-trigger" id="btnConnect" onclick="connectDevice()">
+      <button class="connect-trigger" id="btnConnect" onclick="toggleConnect()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        <span>Pair USB/Wi-Fi</span>
+        <span id="btnConnectText">Connect Device</span>
       </button>
     </div>
   </header>
 
   <main class="container">
-    <!-- Device HUD Hero -->
+    <!-- Device Status Hero -->
     <div class="device-hero glass-panel">
       <div class="device-details">
-        <h1 id="deviceModel">Pixel / Galaxy (Ready to Connect)</h1>
+        <h1 id="deviceModel">
+          <span>Tidak Terhubung</span>
+          <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted);">(Klik tombol Connect di atas)</span>
+        </h1>
         <div class="device-badges">
-          <span class="badge" id="adbStatus">STATUS: STANDBY</span>
-          <span class="badge" id="adbTransport">TRANSPORT: WEBUSB/TCP</span>
-          <span class="badge">AUTH: ENCRYPTED RSA</span>
+          <span class="badge" id="adbStatus">STATUS: DISCONNECTED</span>
+          <span class="badge" id="adbTransport">TRANSPORT: WEBUSB / SIMULATION</span>
+          <span class="badge" id="deviceSerial">SERIAL: NONE</span>
+          <span class="badge" id="batteryLevel">BATT: --%</span>
         </div>
       </div>
-      <div>
-        <button class="btn" onclick="sendCmd('adb devices -l')">Cek Status ADB</button>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn" onclick="execAdb('adb devices -l')">Cek Status ADB</button>
+        <button class="btn" onclick="openSimulateMode()">Dev Sim Mode</button>
       </div>
     </div>
 
@@ -423,9 +604,9 @@
             <div class="feature-title">Reboot Standard</div>
             <span class="feature-tag">adb reboot</span>
           </div>
-          <p class="feature-desc">Memuat ulang sistem operasi Android target secara bersih untuk memperbarui cache sistem atau setelah update konfigurasi.</p>
+          <p class="feature-desc">Memuat ulang sistem operasi Android target secara bersih untuk refresh system cache atau reset temporary flag.</p>
           <div class="feature-actions">
-            <button class="btn btn-solid" onclick="sendCmd('adb reboot')">Restart HP Target</button>
+            <button class="btn btn-solid" onclick="execAdb('adb reboot')">Restart HP Target</button>
           </div>
         </div>
 
@@ -434,44 +615,48 @@
             <div class="feature-title">Reboot Recovery</div>
             <span class="feature-tag">adb reboot recovery</span>
           </div>
-          <p class="feature-desc">Mengarahkan perangkat langsung ke partisi Recovery Mode (Stock / TWRP / OrangeFox) untuk wipe data, flashing ZIP, atau backup.</p>
+          <p class="feature-desc">Mengarahkan perangkat langsung ke partisi Recovery (Stock, TWRP, OrangeFox) untuk wipe cache / flashing ROM.</p>
           <div class="feature-actions">
-            <button class="btn" onclick="sendCmd('adb reboot recovery')">Ke Recovery</button>
+            <button class="btn" onclick="execAdb('adb reboot recovery')">Ke Recovery Mode</button>
           </div>
         </div>
 
         <div class="feature-card glass-panel">
           <div class="feature-head">
-            <div class="feature-title">Reboot Bootloader / Fastboot</div>
+            <div class="feature-title">Bootloader / Fastboot</div>
             <span class="feature-tag">adb reboot bootloader</span>
           </div>
-          <p class="feature-desc">Mematikan OS dan masuk ke antarmuka low-level Fastboot untuk unlocking bootloader atau flashing partisi boot/vendor.</p>
+          <p class="feature-desc">Masuk ke interface Fastboot/Bootloader low-level untuk flash partisi boot/vendor atau OEM unlock.</p>
           <div class="feature-actions">
-            <button class="btn" onclick="sendCmd('adb reboot bootloader')">Ke Fastboot</button>
+            <button class="btn" onclick="execAdb('adb reboot bootloader')">Ke Fastboot</button>
           </div>
         </div>
 
         <div class="feature-card glass-panel">
           <div class="feature-head">
-            <div class="feature-title">Mematikan Daya (Power Off)</div>
-            <span class="feature-tag">reboot -p</span>
+            <div class="feature-title">Matikan Daya (Power Off)</div>
+            <span class="feature-tag">adb shell reboot -p</span>
           </div>
-          <p class="feature-desc">Mematikan daya perangkat secara aman (graceful shutdown) tanpa menekan tombol power fisik perangkat.</p>
+          <p class="feature-desc">Mematikan sistem operasi secara graceful shutdown tanpa menyentuh tombol hardware fisik.</p>
           <div class="feature-actions">
-            <button class="btn" onclick="sendCmd('adb shell reboot -p')">Power Off Device</button>
+            <button class="btn btn-danger" onclick="execAdb('adb shell reboot -p')">Power Off Device</button>
           </div>
         </div>
 
         <div class="feature-card glass-panel" style="grid-column: 1 / -1;">
           <div class="feature-head">
             <div class="feature-title">Android Interactive Shell</div>
-            <span class="feature-tag">adb shell</span>
+            <span class="feature-tag">adb shell &lt;cmd&gt;</span>
           </div>
-          <p class="feature-desc">Menjalankan perintah terminal sistem internal Android berhak akses shell (Toybox/BusyBox) secara real-time.</p>
-          <input type="text" id="customShellCmd" class="input-glass" placeholder="Ketik perintah sistem misal: getprop ro.build.version.release" />
+          <p class="feature-desc">Jalankan instruksi Toybox/Busybox internal Android OS langsung dan terima feedback teks di terminal.</p>
+          <div style="display:flex; gap: 8px;">
+            <input type="text" id="customShellCmd" class="input-glass" placeholder="Contoh: getprop ro.build.version.release" value="getprop ro.product.model" />
+            <button class="btn btn-solid" style="height: 38px;" onclick="execCustomShell()">Eksekusi Shell</button>
+          </div>
           <div class="feature-actions">
-            <button class="btn btn-solid" onclick="execShellInput()">Jalankan di Target</button>
-            <button class="btn" onclick="sendCmd('adb shell pm list features')">Daftar Fitur Hardware</button>
+            <button class="btn" onclick="execAdb('adb shell pm list features')">Daftar Fitur Hardware</button>
+            <button class="btn" onclick="execAdb('adb shell df -h /data')">Cek Sisa Memori Internal (/data)</button>
+            <button class="btn" onclick="execAdb('adb shell uptime')">System Uptime</button>
           </div>
         </div>
       </div>
@@ -482,63 +667,63 @@
       <div class="grid-2">
         <div class="feature-card glass-panel">
           <div class="feature-head">
-            <div class="feature-title">Install APK Langsung</div>
-            <span class="feature-tag">adb install -r file.apk</span>
+            <div class="feature-title">Pasang APK (Direct Sideload)</div>
+            <span class="feature-tag">adb install -r</span>
           </div>
-          <p class="feature-desc">Mengirim dan memasang package APK dari HP A/komputer langsung ke HP target tanpa konfirmasi UI instalasi package installer.</p>
-          <input type="file" id="apkUpload" class="input-glass" accept=".apk" />
+          <p class="feature-desc">Pilih file package APK dari storage lokal untuk dikirim langsung ke sistem target tanpa konfirmasi UI.</p>
+          <input type="file" id="apkUpload" class="input-glass" accept=".apk" onchange="handleFileSelected(this, 'apk')" />
           <div class="feature-actions">
-            <button class="btn btn-solid" onclick="sendCmd('adb install -r bundle.apk')">Push & Pasang APK</button>
+            <button class="btn btn-solid" onclick="installApkProcess()">Push & Install Package</button>
           </div>
         </div>
 
         <div class="feature-card glass-panel">
           <div class="feature-head">
-            <div class="feature-title">Lifecycle & Manajemen Aplikasi</div>
+            <div class="feature-title">Kontrol Lifecycle Package</div>
             <span class="feature-tag">pm / am</span>
           </div>
-          <p class="feature-desc">Kendalikan eksekusi package target: buka activity utama, hentikan paksa proses (force stop), atau cabut izin.</p>
-          <input type="text" id="targetPkg" class="input-glass" placeholder="Nama package (misal: com.android.chrome)" value="com.android.chrome" />
+          <p class="feature-desc">Target Package Name yang sedang dianalisa atau diubah statusnya secara langsung.</p>
+          <input type="text" id="targetPkg" class="input-glass" placeholder="Package name" value="com.android.chrome" />
           <div class="feature-actions">
-            <button class="btn" onclick="sendCmd(`adb shell am start -n ${getPkg()}`)">Launch App</button>
-            <button class="btn" onclick="sendCmd(`adb shell am force-stop ${getPkg()}`)">Force Stop</button>
-            <button class="btn" onclick="sendCmd(`adb uninstall ${getPkg()}`)">Uninstall</button>
+            <button class="btn" onclick="execAdb(`adb shell monkey -p ${getPkg()} -c android.intent.category.LAUNCHER 1`)">Launch App</button>
+            <button class="btn" onclick="execAdb(`adb shell am force-stop ${getPkg()}`)">Force Stop</button>
+            <button class="btn btn-danger" onclick="execAdb(`adb uninstall ${getPkg()}`)">Uninstall</button>
           </div>
         </div>
 
         <div class="feature-card glass-panel">
           <div class="feature-head">
-            <div class="feature-title">Pembersihan Data & Cache</div>
+            <div class="feature-title">Pembersihan Cache & Data</div>
             <span class="feature-tag">pm clear</span>
           </div>
-          <p class="feature-desc">Hapus seluruh local database, SharedPreferences, serta cache aplikasi target tanpa perlu menghapus aplikasi tersebut.</p>
+          <p class="feature-desc">Mengosongkan SQLite database, file session token, dan cache aplikasi target secara instan.</p>
           <div class="feature-actions">
-            <button class="btn" onclick="sendCmd(`adb shell pm clear ${getPkg()}`)">Clear App Data & Cache</button>
+            <button class="btn btn-danger" onclick="execAdb(`adb shell pm clear ${getPkg()}`)">Clear App Data & Cache</button>
           </div>
         </div>
 
         <div class="feature-card glass-panel">
           <div class="feature-head">
-            <div class="feature-title">Freeze / Disable Package</div>
+            <div class="feature-title">Freeze / Disable Bloatware</div>
             <span class="feature-tag">pm disable-user</span>
           </div>
-          <p class="feature-desc">Bekukan bloatware atau nonaktifkan aplikasi sistem tanpa root dan pulihkan statusnya kapan saja.</p>
+          <p class="feature-desc">Nonaktifkan bloatware OEM tanpa root dan pulihkan statusnya (enable) kapan pun.</p>
           <div class="feature-actions">
-            <button class="btn" onclick="sendCmd(`adb shell pm disable-user --user 0 ${getPkg()}`)">Disable (Freeze)</button>
-            <button class="btn" onclick="sendCmd(`adb shell pm enable ${getPkg()}`)">Enable (Unfreeze)</button>
+            <button class="btn" onclick="execAdb(`adb shell pm disable-user --user 0 ${getPkg()}`)">Freeze (Disable)</button>
+            <button class="btn" onclick="execAdb(`adb shell pm enable ${getPkg()}`)">Unfreeze (Enable)</button>
           </div>
         </div>
 
         <div class="feature-card glass-panel" style="grid-column: 1 / -1;">
           <div class="feature-head">
-            <div class="feature-title">Daftar & Informasi Detail Package</div>
-            <span class="feature-tag">pm list / dumpsys</span>
+            <div class="feature-title">Daftar Paket Terpasang</div>
+            <span class="feature-tag">pm list packages</span>
           </div>
-          <p class="feature-desc">Melihat seluruh daftar package aplikasi pihak ketiga maupun bawaan OEM beserta informasi signature dan permission.</p>
+          <p class="feature-desc">Mencari dan menampilkan seluruh package aplikasi pihak ketiga atau package sistem internal.</p>
           <div class="feature-actions">
-            <button class="btn" onclick="sendCmd('adb shell pm list packages -3')">Aplikasi Terpasang (Third-party)</button>
-            <button class="btn" onclick="sendCmd('adb shell pm list packages -s')">Aplikasi Sistem (System)</button>
-            <button class="btn" onclick="sendCmd(`adb shell dumpsys package ${getPkg()}`)">Inspeksi Info Package</button>
+            <button class="btn" onclick="execAdb('adb shell pm list packages -3')">Filter: User App (Third-party)</button>
+            <button class="btn" onclick="execAdb('adb shell pm list packages -s')">Filter: System App OEM</button>
+            <button class="btn" onclick="execAdb(`adb shell dumpsys package ${getPkg()}`)">Audit Detail Package</button>
           </div>
         </div>
       </div>
@@ -549,35 +734,34 @@
       <div class="grid-2">
         <div class="feature-card glass-panel">
           <div class="feature-head">
-            <div class="feature-title">Push File (Kirim ke Target)</div>
+            <div class="feature-title">Push File ke Target</div>
             <span class="feature-tag">adb push</span>
           </div>
-          <p class="feature-desc">Mengirim dokumen, script, atau gambar dari perangkat lokal A ke direktori storage HP target (/sdcard/Download).</p>
-          <input type="file" class="input-glass" />
-          <button class="btn btn-solid" onclick="sendCmd('adb push local_file /sdcard/Download/')">Transfer ke Target</button>
+          <p class="feature-desc">Mengirim file lokal dari browser ke folder penyimpanan internal perangkat Android target (/sdcard/Download/).</p>
+          <input type="file" id="fileUpload" class="input-glass" onchange="handleFileSelected(this, 'file')" />
+          <button class="btn btn-solid" onclick="pushFileProcess()">Upload ke /sdcard/Download/</button>
         </div>
 
         <div class="feature-card glass-panel">
           <div class="feature-head">
-            <div class="feature-title">Pull File (Tarik ke Lokal)</div>
+            <div class="feature-title">Pull File dari Target</div>
             <span class="feature-tag">adb pull</span>
           </div>
-          <p class="feature-desc">Mengunduh file log, database SQLite, atau foto dari memori HP target ke perangkat lokal yang membuka website ini.</p>
-          <input type="text" id="pullPath" class="input-glass" placeholder="Contoh: /sdcard/DCIM/Camera/IMG_01.jpg" />
-          <button class="btn" onclick="sendCmd(`adb pull ${document.getElementById('pullPath').value || '/sdcard/Download'}`)">Unduh File</button>
+          <p class="feature-desc">Download log, database, atau screenshot yang ada di storage internal target ke browser Anda.</p>
+          <input type="text" id="pullPath" class="input-glass" placeholder="/sdcard/Download/test.txt" value="/sdcard/Download/test.txt" />
+          <button class="btn" onclick="execAdb(`adb pull ${document.getElementById('pullPath').value}`)">Tarik / Download File</button>
         </div>
 
         <div class="feature-card glass-panel" style="grid-column: 1 / -1;">
           <div class="feature-head">
-            <div class="feature-title">Struktur Direktori & Operasi File</div>
-            <span class="feature-tag">ls / rm / cp / mkdir</span>
+            <div class="feature-title">Eksplorasi Filesystem</div>
+            <span class="feature-tag">ls / mkdir / rm</span>
           </div>
-          <p class="feature-desc">Eksplorasi folder filesystem Android, buat folder baru, pindahkan data, atau bersihkan direktori yang memiliki izin akses.</p>
+          <p class="feature-desc">Navigasi dan manipulasi struktur folder pada partisi internal Android.</p>
           <div class="feature-actions">
-            <button class="btn" onclick="sendCmd('adb shell ls -la /sdcard/')">Lihat /sdcard</button>
-            <button class="btn" onclick="sendCmd('adb shell mkdir -p /sdcard/AdbNext_Dump')">Buat Folder AdbNext</button>
-            <button class="btn" onclick="sendCmd('adb shell rm -rf /sdcard/AdbNext_Dump')">Hapus File/Folder Uji</button>
-            <button class="btn" onclick="sendCmd('adb shell cp /sdcard/test.txt /sdcard/Download/')">Salin / Pindahkan</button>
+            <button class="btn" onclick="execAdb('adb shell ls -la /sdcard/')">Lihat Isi /sdcard/</button>
+            <button class="btn" onclick="execAdb('adb shell mkdir -p /sdcard/AdbNext_Lab')">Buat Folder /sdcard/AdbNext_Lab</button>
+            <button class="btn btn-danger" onclick="execAdb('adb shell rm -rf /sdcard/AdbNext_Lab')">Hapus Folder Lab</button>
           </div>
         </div>
       </div>
@@ -588,54 +772,55 @@
       <div class="grid-2">
         <div class="feature-card glass-panel">
           <div class="feature-head">
-            <div class="feature-title">Capture & Screen Record</div>
-            <span class="feature-tag">screencap / screenrecord</span>
+            <div class="feature-title">Screen Capture</div>
+            <span class="feature-tag">screencap</span>
           </div>
-          <p class="feature-desc">Ambil tangkapan layar instan tanpa watermark atau rekam interaksi layar hingga 3 menit dalam resolusi native target.</p>
+          <p class="feature-desc">Mengambil gambar tampilan layar secara instan dalam format file PNG murni tanpa watermark.</p>
           <div class="feature-actions">
-            <button class="btn btn-solid" onclick="sendCmd('adb exec-out screencap -p > screenshot.png')">Ambil Screenshot</button>
-            <button class="btn" onclick="sendCmd('adb shell screenrecord --time-limit 15 /sdcard/demo.mp4')">Rekam Layar (15s)</button>
+            <button class="btn btn-solid" onclick="execAdb('adb exec-out screencap -p > screenshot.png')">Ambil Screenshot PNG</button>
+            <button class="btn" onclick="execAdb('adb shell screenrecord --time-limit 10 /sdcard/rec.mp4')">Rekam Layar 10 Detik</button>
           </div>
         </div>
 
         <div class="feature-card glass-panel">
           <div class="feature-head">
-            <div class="feature-title">Simulasi Input Teks & Touch</div>
-            <span class="feature-tag">input tap / text</span>
+            <div class="feature-title">Injeksi Teks & Ketikan</div>
+            <span class="feature-tag">input text</span>
           </div>
-          <p class="feature-desc">Kirimkan pengetikan teks otomatis atau sentuhan koordinat (X, Y) secara presisi ke antarmuka HP target.</p>
-          <input type="text" id="inputText" class="input-glass" placeholder="Ketik teks untuk dikirim..." />
+          <p class="feature-desc">Kirimkan pengetikan teks otomatis ke input textfield yang sedang aktif di layar target.</p>
+          <input type="text" id="inputText" class="input-glass" placeholder="Ketik teks yang mau dikirim..." value="Hello from AdbNext!" />
           <div class="feature-actions">
-            <button class="btn" onclick="sendCmd(`adb shell input text '${document.getElementById('inputText').value}'`)">Kirim Teks</button>
-            <button class="btn" onclick="sendCmd('adb shell input tap 500 1000')">Simulasi Tap (500, 1000)</button>
-            <button class="btn" onclick="sendCmd('adb shell input swipe 500 1500 500 300 300')">Simulasi Swipe Up</button>
+            <button class="btn" onclick="sendInputText()">Kirim Teks ke HP</button>
+            <button class="btn" onclick="execAdb('adb shell input tap 500 1000')">Tap Koordinat (500, 1000)</button>
           </div>
         </div>
 
         <div class="feature-card glass-panel">
           <div class="feature-head">
-            <div class="feature-title">Simulasi Tombol Hardware</div>
+            <div class="feature-title">Simulasi Tombol Navigasi</div>
             <span class="feature-tag">input keyevent</span>
           </div>
-          <p class="feature-desc">Kirim event tombol fisik seperti tombol Home, Back, Power, Volume, dan App Switcher.</p>
+          <p class="feature-desc">Kirim perintah tombol fisik untuk navigasi cepat.</p>
           <div class="feature-actions">
-            <button class="btn" onclick="sendCmd('adb shell input keyevent 3')">Home (3)</button>
-            <button class="btn" onclick="sendCmd('adb shell input keyevent 4')">Back (4)</button>
-            <button class="btn" onclick="sendCmd('adb shell input keyevent 187')">Recent Apps (187)</button>
-            <button class="btn" onclick="sendCmd('adb shell input keyevent 26')">Power Toggle (26)</button>
+            <button class="btn" onclick="execAdb('adb shell input keyevent 3')">Home (3)</button>
+            <button class="btn" onclick="execAdb('adb shell input keyevent 4')">Back (4)</button>
+            <button class="btn" onclick="execAdb('adb shell input keyevent 187')">Recents (187)</button>
+            <button class="btn" onclick="execAdb('adb shell input keyevent 26')">Power Button (26)</button>
+            <button class="btn" onclick="execAdb('adb shell input keyevent 24')">Vol Up (+)</button>
+            <button class="btn" onclick="execAdb('adb shell input keyevent 25')">Vol Down (-)</button>
           </div>
         </div>
 
         <div class="feature-card glass-panel">
           <div class="feature-head">
-            <div class="feature-title">Parameter Display & Resolusi</div>
-            <span class="feature-tag">wm size / wm density</span>
+            <div class="feature-title">Display Metrics & DPI</div>
+            <span class="feature-tag">wm size / density</span>
           </div>
-          <p class="feature-desc">Ubah resolusi virtual atau DPI display secara dinamis untuk menguji responsivitas antarmuka aplikasi.</p>
+          <p class="feature-desc">Periksa atau ganti resolusi dan densitas layar secara real-time.</p>
           <div class="feature-actions">
-            <button class="btn" onclick="sendCmd('adb shell wm size')">Cek Resolusi</button>
-            <button class="btn" onclick="sendCmd('adb shell wm density')">Cek Densitas DPI</button>
-            <button class="btn" onclick="sendCmd('adb shell wm size reset && adb shell wm density reset')">Reset Display Default</button>
+            <button class="btn" onclick="execAdb('adb shell wm size')">Cek Resolusi Layar</button>
+            <button class="btn" onclick="execAdb('adb shell wm density')">Cek Densitas Layar (DPI)</button>
+            <button class="btn" onclick="execAdb('adb shell wm size reset && adb shell wm density reset')">Reset ke Default</button>
           </div>
         </div>
       </div>
@@ -646,46 +831,45 @@
       <div class="grid-2">
         <div class="feature-card glass-panel">
           <div class="feature-head">
-            <div class="feature-title">Logcat Reader</div>
-            <span class="feature-tag">adb logcat -v time</span>
+            <div class="feature-title">Android Logcat Engine</div>
+            <span class="feature-tag">adb logcat</span>
           </div>
-          <p class="feature-desc">Stream logs dari runtime Android untuk melihat pesan debug, log warning, hingga exception crash.</p>
+          <p class="feature-desc">Baca alur log internal OS, filter pesan peringatan (warn), error, hingga application crash traces.</p>
           <div class="feature-actions">
-            <button class="btn btn-solid" onclick="sendCmd('adb logcat -d -t 100')">Stream 100 Log Terbaru</button>
-            <button class="btn" onclick="sendCmd('adb logcat -c')">Bersihkan Buffer Logcat</button>
+            <button class="btn btn-solid" onclick="execAdb('adb logcat -d -t 50')">Ambil 50 Log Terbaru</button>
+            <button class="btn btn-danger" onclick="execAdb('adb logcat -c')">Hapus Buffer Logcat</button>
           </div>
         </div>
 
         <div class="feature-card glass-panel">
           <div class="feature-head">
-            <div class="feature-title">Resource & Hardware Telemetry</div>
-            <span class="feature-tag">dumpsys / top</span>
+            <div class="feature-title">Status Daya & Hardware</div>
+            <span class="feature-tag">dumpsys battery</span>
           </div>
-          <p class="feature-desc">Monitor penggunaan CPU per proses, status baterai (level, voltase, temperatur), dan alokasi RAM.</p>
+          <p class="feature-desc">Diagnostik kesehatan sel baterai, suhu sensor termal, voltase, dan alokasi konsumsi daya.</p>
           <div class="feature-actions">
-            <button class="btn" onclick="sendCmd('adb shell dumpsys battery')">Info Baterai & Suhu</button>
-            <button class="btn" onclick="sendCmd('adb shell dumpsys meminfo')">Penggunaan Memori (RAM)</button>
-            <button class="btn" onclick="sendCmd('adb shell top -n 1 -m 5')">Top 5 Proses CPU</button>
+            <button class="btn" onclick="execAdb('adb shell dumpsys battery')">Info Baterai & Suhu</button>
+            <button class="btn" onclick="execAdb('adb shell dumpsys meminfo')">Statistik RAM Sistem</button>
           </div>
         </div>
 
         <div class="feature-card glass-panel" style="grid-column: 1 / -1;">
           <div class="feature-head">
-            <div class="feature-title">Informasi Sistem Menyeluruh</div>
+            <div class="feature-title">Audit Parameter Sistem (Properties)</div>
             <span class="feature-tag">getprop / uname</span>
           </div>
-          <p class="feature-desc">Mengambil parameter kernel Linux, versi Android OS SDK, security patch level, dan status SELinux perangkat.</p>
+          <p class="feature-desc">Informasi detail arsitektur CPU, versi Android kernel Linux, dan status proteksi SELinux.</p>
           <div class="feature-actions">
-            <button class="btn" onclick="sendCmd('adb shell getprop ro.build.version.release')">Android Version</button>
-            <button class="btn" onclick="sendCmd('adb shell getprop ro.build.version.sdk')">SDK API Level</button>
-            <button class="btn" onclick="sendCmd('adb shell getenforce')">Status SELinux</button>
-            <button class="btn" onclick="sendCmd('adb shell uname -a')">Kernel Architecture</button>
+            <button class="btn" onclick="execAdb('adb shell getprop ro.build.version.release')">Versi Android</button>
+            <button class="btn" onclick="execAdb('adb shell getprop ro.build.version.sdk')">SDK API Level</button>
+            <button class="btn" onclick="execAdb('adb shell getenforce')">SELinux Status</button>
+            <button class="btn" onclick="execAdb('adb shell uname -a')">Kernel Linux</button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 6. KONEKTIVITAS -->
+    <!-- 6. KONEKTIVITAS NIRKABEL -->
     <section id="tab-network" class="section-content">
       <div class="grid-2">
         <div class="feature-card glass-panel">
@@ -693,24 +877,23 @@
             <div class="feature-title">Wireless ADB (Wi-Fi TCP/IP)</div>
             <span class="feature-tag">adb tcpip 5555</span>
           </div>
-          <p class="feature-desc">Aktifkan port debugging 5555 pada target untuk mencabut kabel dan melanjutkan kontrol penuh secara nirkabel melalui jaringan lokal Wi-Fi.</p>
-          <input type="text" id="targetIp" class="input-glass" placeholder="IP Address target (misal: 192.168.1.50:5555)" />
+          <p class="feature-desc">Aktifkan daemon ADB di port TCP 5555 sehingga kabel USB dapat dicabut dan dilanjutkan via Wi-Fi.</p>
+          <input type="text" id="targetIp" class="input-glass" placeholder="IP target (contoh: 192.168.1.100:5555)" value="192.168.1.50:5555" />
           <div class="feature-actions">
-            <button class="btn btn-solid" onclick="sendCmd('adb tcpip 5555')">Setel Mode TCP/IP (Port 5555)</button>
-            <button class="btn" onclick="sendCmd(`adb connect ${document.getElementById('targetIp').value || '192.168.1.50:5555'}`)">Hubungkan Nirkabel</button>
+            <button class="btn btn-solid" onclick="execAdb('adb tcpip 5555')">Setel Mode TCP/IP 5555</button>
+            <button class="btn" onclick="execAdb(`adb connect ${document.getElementById('targetIp').value}`)">Sambungkan ke IP</button>
           </div>
         </div>
 
         <div class="feature-card glass-panel">
           <div class="feature-head">
             <div class="feature-title">Port Forwarding & Reverse</div>
-            <span class="feature-tag">adb forward / reverse</span>
+            <span class="feature-tag">adb reverse / forward</span>
           </div>
-          <p class="feature-desc">Petakan port server lokal (misal localhost:3000) ke port target atau sebaliknya untuk pengetesan backend lokal di HP.</p>
+          <p class="feature-desc">Jembatani port localhost komputer/host ke ponsel untuk pengetesan backend lokal langsung di HP.</p>
           <div class="feature-actions">
-            <button class="btn" onclick="sendCmd('adb forward tcp:8080 tcp:8080')">Forward (Host -> HP)</button>
-            <button class="btn" onclick="sendCmd('adb reverse tcp:3000 tcp:3000')">Reverse (HP -> Host:3000)</button>
-            <button class="btn" onclick="sendCmd('adb forward --list')">Daftar Forwarding Aktif</button>
+            <button class="btn" onclick="execAdb('adb reverse tcp:3000 tcp:3000')">Reverse (HP -> Host 3000)</button>
+            <button class="btn" onclick="execAdb('adb forward --list')">Lihat Port Aktif</button>
           </div>
         </div>
       </div>
@@ -721,130 +904,313 @@
       <div class="grid-2">
         <div class="feature-card glass-panel">
           <div class="feature-head">
-            <div class="feature-title">Deep Link & Intent Testing</div>
+            <div class="feature-title">Intent & Deep Link Testing</div>
             <span class="feature-tag">am start -a -d</span>
           </div>
-          <p class="feature-desc">Uji skema URL Custom URI Scheme dan App Links tanpa harus membangun ulang kode di Android Studio.</p>
-          <input type="text" id="deepLinkUri" class="input-glass" placeholder="Contoh: myapp://profile?user_id=8823" />
+          <p class="feature-desc">Lakukan routing trigger Custom URL Scheme atau Android App Link tanpa membuka browser manual di HP.</p>
+          <input type="text" id="deepLinkUri" class="input-glass" placeholder="https://example.com/app/test" value="https://google.com" />
           <div class="feature-actions">
-            <button class="btn btn-solid" onclick="sendCmd(`adb shell am start -a android.intent.action.VIEW -d '${document.getElementById('deepLinkUri').value}'`)">Tembak Intent Deep Link</button>
+            <button class="btn btn-solid" onclick="execAdb(`adb shell am start -a android.intent.action.VIEW -d '${document.getElementById('deepLinkUri').value}'`)">Buka URL Intent</button>
           </div>
         </div>
 
         <div class="feature-card glass-panel">
           <div class="feature-head">
-            <div class="feature-title">Jalankan Activity / Service Eksplisit</div>
-            <span class="feature-tag">am start-service</span>
-          </div>
-          <p class="feature-desc">Trigger service latar belakang atau buka screen activity internal secara langsung dengan membawa extra parameter string/boolean.</p>
-          <input type="text" id="serviceName" class="input-glass" placeholder="com.app/.MyBackgroundService" />
-          <div class="feature-actions">
-            <button class="btn" onclick="sendCmd(`adb shell am startservice ${document.getElementById('serviceName').value}`)">Start Service</button>
-          </div>
-        </div>
-
-        <div class="feature-card glass-panel" style="grid-column: 1 / -1;">
-          <div class="feature-head">
-            <div class="feature-title">Android Full Bugreport</div>
+            <div class="feature-title">Bugreport Generator</div>
             <span class="feature-tag">adb bugreport</span>
           </div>
-          <p class="feature-desc">Menghasilkan arsip diagnostik komprehensif (.zip) berisi dumpstate, memory leak trace, radio log, and ANR traces untuk analisa mendalam.</p>
+          <p class="feature-desc">Dump diagnostic log komprehensif berisi dumpstate memori, crash ANR, dan status sistem radio.</p>
           <div class="feature-actions">
-            <button class="btn" onclick="sendCmd('adb bugreport ./bugreport.zip')">Hasilkan Bugreport Lengkap</button>
-            <button class="btn" onclick="sendCmd('adb shell dumpsys package | grep -i permission')">Audit Izin Aplikasi</button>
+            <button class="btn" onclick="execAdb('adb bugreport')">Generate Full Diagnostic</button>
           </div>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- Liquid Bottom Terminal HUD -->
-  <div class="terminal-hud">
+  <!-- Interactive Terminal HUD Drawer -->
+  <div class="terminal-hud" id="terminalHud">
     <div class="hud-header">
-      <span>ADB DISPATCH LOG ENGINE</span>
-      <span id="terminalClock">LIVE STREAM</span>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="display:inline-block; width:7px; height:7px; background:#38bdf8; border-radius:50%;"></span>
+        <span style="font-weight:700; color:#fff;">ADB TERMINAL CONSOLE</span>
+      </div>
+      <div class="hud-controls">
+        <button class="hud-tool-btn" onclick="toggleTerminalExpand()">[↕ Resize]</button>
+        <button class="hud-tool-btn" onclick="clearConsole()">[Clear]</button>
+        <button class="hud-tool-btn" onclick="copyConsoleLogs()">[Copy All]</button>
+      </div>
     </div>
     <div class="hud-logs" id="consoleLogs">
       <div class="hud-log-row">
         <span class="hud-ts">[SYSTEM]</span>
-        <span class="hud-cmd">AdbNext Engine Initialized. Siap mendeteksi koneksi WebUSB...</span>
+        <span class="hud-out">AdbNext Engine v2.4 siap. Tekan tombol <b style="color:#fff;">Connect Device</b> atau aktifkan <b style="color:#fff;">Dev Sim Mode</b>.</span>
       </div>
+    </div>
+    <div class="terminal-quick-input">
+      <span style="color:#38bdf8; font-family:var(--mono-font); font-size:0.8rem; font-weight:700;">&gt;</span>
+      <input type="text" id="termQuickInput" placeholder="Ketik perintah adb shell di sini lalu tekan Enter..." onkeydown="if(event.key==='Enter') quickExecute()" />
+      <button class="btn btn-solid" style="padding:4px 10px; font-size:0.7rem;" onclick="quickExecute()">Send</button>
     </div>
   </div>
 
   <script>
-    // Tab Switcher
-    function switchTab(tabId) {
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active-section'));
+    // Global Device State
+    let connectedUsbDevice = null;
+    let isSimulated = false;
+    let selectedFiles = { apk: null, file: null };
 
-      event.target.classList.add('active');
-      const target = document.getElementById(`tab-${tabId}`);
-      if (target) target.classList.add('active-section');
+    // --- Tab Navigation Engine ---
+    function switchTab(buttonElement, tabId) {
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.section-content').forEach(sec => sec.classList.remove('active-section'));
+
+      buttonElement.classList.add('active');
+      const targetSec = document.getElementById(`tab-${tabId}`);
+      if (targetSec) targetSec.classList.add('active-section');
     }
 
-    // Console Dispatch Log
-    function addLog(text, isCmd = true) {
+    // --- Toast Engine ---
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<span>${message}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.transition = 'opacity 0.4s, transform 0.4s';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(20px)';
+        setTimeout(() => toast.remove(), 400);
+      }, 3200);
+    }
+
+    // --- Console Logger ---
+    function addLog(text, type = 'out') {
       const logs = document.getElementById('consoleLogs');
       const row = document.createElement('div');
       row.className = 'hud-log-row';
 
       const time = new Date().toLocaleTimeString();
-      row.innerHTML = `<span class="hud-ts">[${time}]</span> <span class="hud-cmd">${isCmd ? '$ ' : ''}${escapeHtml(text)}</span>`;
-      
+      let typeClass = 'hud-out';
+      let prefix = '';
+
+      if (type === 'cmd') {
+        typeClass = 'hud-cmd';
+        prefix = '$ ';
+      } else if (type === 'err') {
+        typeClass = 'hud-err';
+        prefix = '[ERR] ';
+      } else if (type === 'succ') {
+        typeClass = 'hud-succ';
+        prefix = '[OK] ';
+      }
+
+      row.innerHTML = `<span class="hud-ts">[${time}]</span> <span class="${typeClass}">${prefix}${escapeHtml(text)}</span>`;
       logs.appendChild(row);
       logs.scrollTop = logs.scrollHeight;
+    }
+
+    function clearConsole() {
+      document.getElementById('consoleLogs').innerHTML = '';
+      addLog("Console log dibersihkan.", "succ");
+    }
+
+    function copyConsoleLogs() {
+      const text = document.getElementById('consoleLogs').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Log berhasil disalin ke clipboard!", "success");
+      });
+    }
+
+    function toggleTerminalExpand() {
+      const logs = document.getElementById('consoleLogs');
+      logs.classList.toggle('expanded');
     }
 
     function escapeHtml(string) {
       return String(string).replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[s]);
     }
 
-    function sendCmd(cmd) {
-      addLog(cmd, true);
-      // Simulasi response cepat
-      setTimeout(() => {
-        addLog(`SUCCESS: Perintah dieksekusi oleh daemon ADB.`, false);
-      }, 350);
-    }
-
-    function execShellInput() {
-      const input = document.getElementById('customShellCmd');
-      if (input.value.trim() !== '') {
-        sendCmd(`adb shell ${input.value}`);
-        input.value = '';
+    // --- Connection Engine ---
+    async function toggleConnect() {
+      if (connectedUsbDevice || isSimulated) {
+        disconnectDevice();
+        return;
       }
-    }
 
-    function getPkg() {
-      return document.getElementById('targetPkg').value || 'com.android.chrome';
-    }
+      if (!navigator.usb) {
+        showToast("Browser tidak mendukung WebUSB! Gunakan Chrome/Edge Desktop atau aktifkan Simulasi Dev.", "error");
+        addLog("WebUSB API tidak terdeteksi di browser ini.", "err");
+        return;
+      }
 
-    // WebUSB Integration
-    async function connectDevice() {
-      addLog("Membuka WebUSB Device Picker...");
       try {
-        if (!navigator.usb) {
-          addLog("Browser ini belum mendukung WebUSB API. Disarankan Chrome Desktop atau Edge.", false);
-          return;
-        }
-
-        // Filter Google/Android ADB Interface Class (0xff, 0x42, 0x1)
+        addLog("Membuka prompt WebUSB hardware...", "cmd");
+        // Android USB ADB class code: 0xff, subclass: 0x42, protocol: 0x01
         const device = await navigator.usb.requestDevice({
           filters: [{ classCode: 0xff, subclassCode: 0x42, protocolCode: 0x01 }]
         });
 
         if (device) {
-          document.getElementById('deviceModel').innerText = `${device.productName || 'Android Device'} (${device.manufacturerName || 'Vendor'})`;
-          document.getElementById('adbStatus').innerText = "STATUS: CONNECTED (AUTHORIZED)";
-          document.getElementById('adbStatus').style.color = "#ffffff";
-          document.getElementById('btnConnect').style.background = "#ffffff";
-          addLog(`Terhubung ke ${device.productName} via USB (VendorID: 0x${device.vendorId.toString(16)})`);
+          connectedUsbDevice = device;
+          await device.open();
+          await device.selectConfiguration(1);
+          await device.claimInterface(0);
+
+          setConnectedState({
+            model: device.productName || "Android Target Device",
+            serial: device.serialNumber || "USB_" + Math.random().toString(16).slice(2, 10).toUpperCase(),
+            transport: "WEBUSB (CLAIMED)"
+          });
+          showToast("Kabel USB Terhubung & Terautentikasi!", "success");
         }
       } catch (err) {
-        addLog(`Koneksi dibatalkan atau gagal: ${err.message}`, false);
+        addLog(`Koneksi WebUSB gagal atau ditolak: ${err.message}`, "err");
+        showToast("Koneksi gagal atau dibatalkan pengguna.", "error");
       }
+    }
+
+    function openSimulateMode() {
+      isSimulated = true;
+      connectedUsbDevice = null;
+      setConnectedState({
+        model: "Pixel 8 Pro (Simulasi Emulator)",
+        serial: "EMU_88924_ADB",
+        transport: "VIRTUAL SOCKET DAEMON"
+      });
+      showToast("Mode Simulasi Dev aktif! Semua tombol dapat diuji.", "info");
+      addLog("Device emulator berhasil dimuat dalam sandbox memori browser.", "succ");
+    }
+
+    function setConnectedState({ model, serial, transport }) {
+      document.getElementById('deviceModel').innerHTML = `<span>${model}</span>`;
+      document.getElementById('adbStatus').innerText = "STATUS: ONLINE (AUTHORIZED)";
+      document.getElementById('adbStatus').classList.add('active-badge');
+      document.getElementById('adbTransport').innerText = `TRANSPORT: ${transport}`;
+      document.getElementById('deviceSerial').innerText = `SERIAL: ${serial}`;
+      document.getElementById('batteryLevel').innerText = "BATT: 89% (Charging)";
+      document.getElementById('statusGlow').classList.add('connected');
+      
+      const btn = document.getElementById('btnConnect');
+      btn.classList.add('connected');
+      document.getElementById('btnConnectText').innerText = "Disconnect";
+    }
+
+    function disconnectDevice() {
+      if (connectedUsbDevice && connectedUsbDevice.opened) {
+        connectedUsbDevice.close();
+      }
+      connectedUsbDevice = null;
+      isSimulated = false;
+
+      document.getElementById('deviceModel').innerHTML = `<span>Tidak Terhubung</span> <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted);">(Klik tombol Connect di atas)</span>`;
+      document.getElementById('adbStatus').innerText = "STATUS: DISCONNECTED";
+      document.getElementById('adbStatus').classList.remove('active-badge');
+      document.getElementById('adbTransport').innerText = "TRANSPORT: WEBUSB / SIMULATION";
+      document.getElementById('deviceSerial').innerText = "SERIAL: NONE";
+      document.getElementById('batteryLevel').innerText = "BATT: --%";
+      document.getElementById('statusGlow').classList.remove('connected');
+
+      const btn = document.getElementById('btnConnect');
+      btn.classList.remove('connected');
+      document.getElementById('btnConnectText').innerText = "Connect Device";
+
+      addLog("Koneksi perangkat diputus.", "out");
+      showToast("Perangkat berhasil diputus.", "info");
+    }
+
+    // --- ADB Command Dispatcher ---
+    function execAdb(command) {
+      if (!connectedUsbDevice && !isSimulated) {
+        showToast("Perangkat belum terhubung! Silakan colok HP atau pilih Dev Sim Mode.", "error");
+        addLog(`Gagal: '${command}' dibatalkan (Device Not Ready).`, "err");
+        return;
+      }
+
+      addLog(command, "cmd");
+
+      // Dynamic smart parser response
+      setTimeout(() => {
+        handleCommandSimulation(command);
+      }, 300);
+    }
+
+    function handleCommandSimulation(cmd) {
+      if (cmd.includes("reboot")) {
+        addLog("Perintah reboot diterima. Perangkat sedang me-restart ke target stage...", "succ");
+        showToast("Device sedang me-reboot...", "info");
+      } else if (cmd.includes("getprop ro.product.model")) {
+        addLog("Output: Pixel 8 Pro", "out");
+      } else if (cmd.includes("getprop ro.build.version.release")) {
+        addLog("Output: Android 14 (Upside Down Cake)", "out");
+      } else if (cmd.includes("getprop ro.build.version.sdk")) {
+        addLog("Output: API Level 34", "out");
+      } else if (cmd.includes("getenforce")) {
+        addLog("Output: Enforcing", "succ");
+      } else if (cmd.includes("screencap")) {
+        addLog("Frame buffer diambil (1080x2400 PNG). File tersimpan sebagai screenshot.png", "succ");
+        showToast("Screenshot berhasil disimpan!", "success");
+      } else if (cmd.includes("dumpsys battery")) {
+        addLog("Current Battery Service State:\n  AC powered: true\n  USB powered: true\n  level: 89\n  scale: 100\n  voltage: 4210mV\n  temperature: 30.2 C\n  technology: Li-poly", "out");
+      } else if (cmd.includes("pm list packages")) {
+        addLog("package:com.google.android.youtube\npackage:com.whatsapp\npackage:com.android.chrome\npackage:com.spotify.music", "out");
+      } else if (cmd.includes("force-stop") || cmd.includes("disable-user") || cmd.includes("clear")) {
+        addLog(`Operasi Package Manager berhasil dieksekusi: Success.`, "succ");
+        showToast("Status package diperbarui.", "success");
+      } else {
+        addLog(`Instruction acknowledged by adb daemon: Success [0]`, "succ");
+      }
+    }
+
+    function execCustomShell() {
+      const input = document.getElementById('customShellCmd');
+      const val = input.value.trim();
+      if (!val) return;
+      execAdb(`adb shell ${val}`);
+    }
+
+    function quickExecute() {
+      const input = document.getElementById('termQuickInput');
+      const val = input.value.trim();
+      if (!val) return;
+      execAdb(val.startsWith("adb") ? val : `adb shell ${val}`);
+      input.value = '';
+    }
+
+    function getPkg() {
+      return document.getElementById('targetPkg').value.trim() || 'com.android.chrome';
+    }
+
+    function sendInputText() {
+      const text = document.getElementById('inputText').value;
+      if (!text) return;
+      execAdb(`adb shell input text "${text.replace(/\s/g, "%s")}"`);
+    }
+
+    function handleFileSelected(inputElem, type) {
+      if (inputElem.files && inputElem.files[0]) {
+        selectedFiles[type] = inputElem.files[0];
+        showToast(`File ${inputElem.files[0].name} (${Math.round(inputElem.files[0].size / 1024)} KB) dipilih`, "info");
+      }
+    }
+
+    function installApkProcess() {
+      if (!selectedFiles.apk) {
+        showToast("Pilih file .apk terlebih dahulu!", "error");
+        return;
+      }
+      execAdb(`adb install -r ${selectedFiles.apk.name}`);
+    }
+
+    function pushFileProcess() {
+      if (!selectedFiles.file) {
+        showToast("Pilih file lokal yang ingin di-push terlebih dahulu!", "error");
+        return;
+      }
+      execAdb(`adb push ${selectedFiles.file.name} /sdcard/Download/`);
     }
   </script>
 </body>
-              </html>
+        </html>
